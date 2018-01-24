@@ -18,7 +18,7 @@ public:
 	bool canWhiteRook;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
-	BoardRepresentation move(BoardRepresentation board, Notation move);
+	bool move(BoardRepresentation board, Notation move);
 	std::string toString();
 };
 

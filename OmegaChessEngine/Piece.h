@@ -6,8 +6,10 @@ enum class PieceType
 	king,
 	queen,
 	bishop,
+	rook,
 	knight,
-	pawn
+	pawn,
+	none
 };
 
 struct Piece
@@ -15,7 +17,7 @@ struct Piece
 	PieceType type;
 	bool isWhite;
 
-	Piece() = delete;
+	Piece() {}
 	Piece(PieceType type, bool isWhite)
 		:type{type}, isWhite{isWhite}
 	{

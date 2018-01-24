@@ -1,7 +1,7 @@
 #include "BoardRepresentation.h"
 
 BoardRepresentation::BoardRepresentation()
-	: isWhiteTurn{ false },
+	: isWhiteTurn{ true },
 	canBlackRook{ true },
 	canWhiteRook{ true },
 	reversibleMovesInRow{ 0 }

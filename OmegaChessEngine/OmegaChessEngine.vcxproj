@@ -113,10 +113,13 @@
   <ItemGroup>
     <ClCompile Include="BoardRepresentation.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MoveGeneration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />
     <ClInclude Include="InvalidChessCaseException.h" />
+    <ClInclude Include="Move.h" />
+    <ClInclude Include="MoveGeneration.h" />
     <ClInclude Include="Notation.h" />
     <ClInclude Include="NotImplementedException.h" />
     <ClInclude Include="Piece.h" />

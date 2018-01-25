@@ -36,18 +36,18 @@ public:
 	}
 
 	int test() { return 1; }
-	std::string GetCoordinateAlgebraicNotation()
+	std::string getCoordinateAlgebraicNotation()
 	{
 		std::string pureCoordinate;
-		pureCoordinate = ChessCaseToAlgebraic(from);
-		pureCoordinate += ChessCaseToAlgebraic(to);
+		pureCoordinate = chessCaseToAlgebraic(from);
+		pureCoordinate += chessCaseToAlgebraic(to);
 		return pureCoordinate;
 	}
 
 private:
 	std::unordered_map<int, std::string> rowIndexToAlgebraic{ { 0,"a" },{ 1,"b" },{ 2,"c" },{ 3,"d" },{ 4,"e" },{ 5,"f" },{ 6,"g" },{ 7,"h" } };
 
-	std::string ChessCaseToAlgebraic(int chessCase)
+	std::string chessCaseToAlgebraic(int chessCase)
 	{ 
 		std::string algebraicNotation;
 		const int COLUMN_SIZE = 8;

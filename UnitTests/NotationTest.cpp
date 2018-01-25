@@ -18,8 +18,8 @@ namespace UnitTests
 			Notation corner1and2{ 0, 7 };
 			Notation corner3and4{ 56, 63 };
 
-			Assert::IsTrue(corner1and2.GetCoordinateAlgebraicNotation() == "a1h1");
-			Assert::IsTrue(corner3and4.GetCoordinateAlgebraicNotation() == "a8h8");
+			Assert::IsTrue(corner1and2.getCoordinateAlgebraicNotation() == "a1h1");
+			Assert::IsTrue(corner3and4.getCoordinateAlgebraicNotation() == "a8h8");
 		}
 
 		TEST_METHOD(TestGetCoordinateAlgebraicNotationOutBound)
@@ -34,8 +34,8 @@ namespace UnitTests
 			Notation corner1and2{ 23, 34 };
 			Notation corner3and4{ 11, 14 };
 
-			Assert::IsTrue(corner1and2.GetCoordinateAlgebraicNotation() == "h3c5");
-			Assert::IsTrue(corner3and4.GetCoordinateAlgebraicNotation() == "d2g2");
+			Assert::IsTrue(corner1and2.getCoordinateAlgebraicNotation() == "h3c5");
+			Assert::IsTrue(corner3and4.getCoordinateAlgebraicNotation() == "d2g2");
 		}
 
 		

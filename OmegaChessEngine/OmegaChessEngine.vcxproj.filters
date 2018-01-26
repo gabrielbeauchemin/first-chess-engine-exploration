@@ -47,13 +47,16 @@
     <ClInclude Include="InvalidChessCaseException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
-    <ClInclude Include="MoveGeneration.h">
-      <Filter>Header Files\BoardRepresentation</Filter>
-    </ClInclude>
     <ClInclude Include="NotImplementedException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
     <ClInclude Include="Move.h">
+      <Filter>Header Files\BoardRepresentation</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveResult.h">
+      <Filter>Header Files\BoardRepresentation</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveGeneration.hpp">
       <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>
   </ItemGroup>

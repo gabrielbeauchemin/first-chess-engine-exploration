@@ -5,6 +5,8 @@
 #include "Piece.h"
 #include "Notation.h"
 #include <String>
+#include "MoveResult.h"
+#include "MoveGeneration.hpp"
 
 class BoardRepresentation
 {
@@ -18,8 +20,16 @@ public:
 	bool canWhiteRook;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
-	bool move(BoardRepresentation board, Notation move);
+	MoveResult move(Notation move);
 	std::string toString();
+
+private: 
+	template<class T>
+	void swap(T array[], int i, int j);
+	bool isMoveARook(Notation move);
+	bool isMoveEnPassant(Notation move);
 };
 
 #endif
+
+

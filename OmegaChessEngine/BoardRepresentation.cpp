@@ -1,4 +1,5 @@
 #include "BoardRepresentation.h"
+#include "InvalidChessCaseException.h"
 
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
@@ -22,7 +23,6 @@ BoardRepresentation::BoardRepresentation()
 	Piece blackBishop = Piece{ PieceType::bishop, false };
 	Piece blackKnight = Piece{ PieceType::knight, false };
 	Piece blackPawn = Piece{ PieceType::pawn, false };
-	
 
 	board[0] = whiteRook; board[1] = whiteKnight; board[2] = whiteBishop; board[3] = whiteKing;
 	board[4] = whiteQueen; board[5] = whiteBishop; board[6] = whiteKnight; board[7] = whiteRook;
@@ -34,11 +34,56 @@ BoardRepresentation::BoardRepresentation()
 }
 
 
+MoveResult BoardRepresentation::move(Notation move)
+{  
+	//Assert move out of bound
+	if (move.from < 0 || move.from > 63 || move.to < 0 || move.to > 63)
+		throw InvalidChessCaseException{};
 
+	//Move the Piece
+	swap<Piece>(board, move.from, move.to);
 
-bool BoardRepresentation::move(BoardRepresentation board, Notation move)
-{
-	return false;
+    //Update Information about the board representation
+	if (board[move.from].type != PieceType::pawn)
+		++this->reversibleMovesInRow;
+
+	if (isMoveARook(move))
+	{
+		if (isWhiteTurn)
+			this->canWhiteRook = false;
+		else
+			this->canBlackRook = false;
+	}
+
+	isWhiteTurn = !this->isWhiteTurn; 
+
+	if (isMoveEnPassant(move))
+	{
+		this->isEnPensantPossible =
+			std::pair<bool, Piece>(false, this->board[move.from]);
+	};
+	
+	//Build MoveResult
+	if (!MoveGeneration::isStateLegal(*this, move)) //move is Now the last move
+	{
+		return MoveResult{ false };
+	}
+
+	//If the game is ended (only checkmate)
+	//Checking for StealMate is not necessary for the chess engine
+	Piece kings;
+	for (int i = 0; i < 64; ++i)
+	{
+		if (board[i].type == PieceType::king)
+		{
+			//Checkmate
+			if (MoveGeneration::isKingCheck(*this, i) &&
+				MoveGeneration::generateKingMoves(*this, i).size == 0)
+				return MoveResult{ true, true, !board[i].isWhite };
+		}
+	}
+		
+	return MoveResult{ true };
 }
 
 std::string BoardRepresentation::toString()
@@ -60,6 +105,7 @@ std::string BoardRepresentation::toString()
 			return "q";
 		else if (p.type == PieceType::rook)
 			return "r";
+		else throw std::exception{};
 	};
 
 	std::string charPieces[64];
@@ -78,4 +124,39 @@ std::string BoardRepresentation::toString()
 	stringBoard += "#################################################\r\n";
 
 	return stringBoard;
+}
+
+bool BoardRepresentation::isMoveARook(Notation move)
+{
+	if(isWhiteTurn)
+	{
+		if(!canWhiteRook)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!canBlackRook)
+		{
+			return false;
+		}
+	}
+
+	bool isPieceMovedAKing = board[move.from].type == PieceType::king;
+	bool isRookTraveling = move.from + 2 == move.to || move.from - 2 == move.to;
+	return isPieceMovedAKing & isRookTraveling;
+}
+
+bool BoardRepresentation::isMoveEnPassant(Notation move)
+{
+	//TO DO
+	return false;
+}
+template<class T>
+void BoardRepresentation::swap(T array[], int i, int j)
+{
+	T temp = array[i];
+	array[i] = array[j];
+	array[j] = temp;
 }

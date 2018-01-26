@@ -119,7 +119,8 @@
     <ClInclude Include="BoardRepresentation.h" />
     <ClInclude Include="InvalidChessCaseException.h" />
     <ClInclude Include="Move.h" />
-    <ClInclude Include="MoveGeneration.h" />
+    <ClInclude Include="MoveGeneration.hpp" />
+    <ClInclude Include="MoveResult.h" />
     <ClInclude Include="Notation.h" />
     <ClInclude Include="NotImplementedException.h" />
     <ClInclude Include="Piece.h" />

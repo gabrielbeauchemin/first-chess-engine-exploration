@@ -68,5 +68,9 @@ namespace MoveGeneration
 	{
 		throw NotImplementedException{};
 	}
+	bool isKingCheck(BoardRepresentation board, int pawnCase)
+	{
+		return false;
+	}
 }
 

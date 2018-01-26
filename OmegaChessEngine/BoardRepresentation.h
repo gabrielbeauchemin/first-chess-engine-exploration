@@ -16,8 +16,8 @@ public:
 	Piece board[64];
 	bool isWhiteTurn;
 	std::pair<bool, Piece> isEnPensantPossible;
-	bool canBlackRook;
-	bool canWhiteRook;
+	bool canBlackCastle;
+	bool canWhiteCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
 	MoveResult move(Notation move);
@@ -26,8 +26,8 @@ public:
 private: 
 	template<class T>
 	void swap(T array[], int i, int j);
-	bool isMoveARook(Notation move);
-	bool isMoveEnPassant(Notation move);
+	bool isMoveCastling(Notation move);
+	bool doesMovePermitEnPassant(Notation move);
 };
 
 #endif

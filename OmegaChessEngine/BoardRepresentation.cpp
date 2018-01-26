@@ -1,10 +1,9 @@
 #include "BoardRepresentation.h"
-#include "InvalidChessCaseException.h"
 
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
-	canBlackRook{ true },
-	canWhiteRook{ true },
+	canBlackCastle{ true },
+	canWhiteCastle{ true },
 	reversibleMovesInRow{ 0 }
 {
 	Piece emptyCase = Piece{ PieceType::none, false };
@@ -24,43 +23,89 @@ BoardRepresentation::BoardRepresentation()
 	Piece blackKnight = Piece{ PieceType::knight, false };
 	Piece blackPawn = Piece{ PieceType::pawn, false };
 
-	board[0] = whiteRook; board[1] = whiteKnight; board[2] = whiteBishop; board[3] = whiteKing;
-	board[4] = whiteQueen; board[5] = whiteBishop; board[6] = whiteKnight; board[7] = whiteRook;
+	board[0] = whiteRook; board[1] = whiteKnight; board[2] = whiteBishop; board[3] = whiteQueen;
+	board[4] = whiteKing; board[5] = whiteBishop; board[6] = whiteKnight; board[7] = whiteRook;
 	for (int i = 8; i != 16; ++i) board[i] = whitePawn;
 	for (int i = 16; i != 48; ++i) board[i] = emptyCase;
 	for (int i = 48; i != 56; ++i) board[i] = blackPawn;
-	board[56] = blackRook; board[57] = blackKnight; board[58] = blackBishop; board[59] = blackKing;
-	board[60] = blackQueen; board[61] = blackBishop; board[62] = blackKnight; board[63] = blackRook;
+	board[56] = blackRook; board[57] = blackKnight; board[58] = blackBishop; board[59] = blackQueen;
+	board[60] = blackKing; board[61] = blackBishop; board[62] = blackKnight; board[63] = blackRook;
 }
 
 
 MoveResult BoardRepresentation::move(Notation move)
 {  
-	//Assert move out of bound
-	if (move.from < 0 || move.from > 63 || move.to < 0 || move.to > 63)
-		throw InvalidChessCaseException{};
+	//Invalid to go to a case that is already occupied
+	if(board[move.to].type != PieceType::none)
+		return MoveResult{ false };
 
 	//Move the Piece
-	swap<Piece>(board, move.from, move.to);
-
-    //Update Information about the board representation
-	if (board[move.from].type != PieceType::pawn)
-		++this->reversibleMovesInRow;
-
-	if (isMoveARook(move))
+	if (isMoveCastling(move))
 	{
+		//Check if the cases between the Castle and the king are empty
+		for(int caseInTheWay = move.from + 1; caseInTheWay < move.to; ++ caseInTheWay)
+			if(board[caseInTheWay].type != PieceType::none)
+				return MoveResult{ false };
+
+		//Valid if the king can Castle
+		bool isKingSideCastle = move.from < move.to; //If false, we know its a queen sine castle
+		int translationKingRook = (isKingSideCastle) ? 2 : -3;
+		bool isRookPresent = board[move.from + translationKingRook].type == PieceType::rook;
+		bool canKingCastle = (this->isWhiteTurn) ? canWhiteCastle : canBlackCastle;
+		if (!isRookPresent || !canKingCastle)
+		{
+			return MoveResult{ false }; //King is not allowed to castle
+		}
+
+		//Castle
+		swap<Piece>(board, move.from, move.to); //Swap King
+		int translationNewRookPos = (canKingCastle) ? 1 : -1;
+		swap<Piece>(board, move.from + translationKingRook, move.from + translationNewRookPos); //Swap Rook
+
 		if (isWhiteTurn)
-			this->canWhiteRook = false;
+			this->canWhiteCastle = false;
 		else
-			this->canBlackRook = false;
+			this->canBlackCastle = false;
 	}
+	//TO DO: Promotion 
+	//else if
+	else
+	{
+		//If king moves, he looses the right to castle
+		if (board[move.from].type == PieceType::king)
+		{
+			if (isWhiteTurn)
+				this->canWhiteCastle = false;
+			else
+				this->canBlackCastle = false;
+		}
+
+		//Move the piece
+		swap<Piece>(board, move.from, move.to);
+	}
+	
+	
+
+	if (board[move.from].type != PieceType::pawn)
+	{
+		++this->reversibleMovesInRow;
+		//Rules of 50 moves: Its stealMate
+		if (this->reversibleMovesInRow > 49) 
+			return MoveResult{ true, true, false, true }; 
+	}
+		
+
+	
 
 	isWhiteTurn = !this->isWhiteTurn; 
 
-	if (isMoveEnPassant(move))
+	//En passant is only good for one move
+	this->isEnPensantPossible = std::pair<bool, Piece>(false, Piece{});
+	//Check if En passant in possible for the next move
+	if (doesMovePermitEnPassant(move))
 	{
 		this->isEnPensantPossible =
-			std::pair<bool, Piece>(false, this->board[move.from]);
+			std::pair<bool, Piece>(true, this->board[move.from]);
 	};
 	
 	//Build MoveResult
@@ -78,7 +123,7 @@ MoveResult BoardRepresentation::move(Notation move)
 		{
 			//Checkmate
 			if (MoveGeneration::isKingCheck(*this, i) &&
-				MoveGeneration::generateKingMoves(*this, i).size == 0)
+				MoveGeneration::generateKingMoves(*this, i).size() == 0)
 				return MoveResult{ true, true, !board[i].isWhite };
 		}
 	}
@@ -126,29 +171,29 @@ std::string BoardRepresentation::toString()
 	return stringBoard;
 }
 
-bool BoardRepresentation::isMoveARook(Notation move)
+bool BoardRepresentation::isMoveCastling(Notation move)
 {
 	if(isWhiteTurn)
 	{
-		if(!canWhiteRook)
+		if(!canWhiteCastle)
 		{
 			return false;
 		}
 	}
 	else
 	{
-		if (!canBlackRook)
+		if (!canBlackCastle)
 		{
 			return false;
 		}
 	}
 
 	bool isPieceMovedAKing = board[move.from].type == PieceType::king;
-	bool isRookTraveling = move.from + 2 == move.to || move.from - 2 == move.to;
-	return isPieceMovedAKing & isRookTraveling;
+	bool isCastleTraveling = move.from + 2 == move.to || move.from - 2 == move.to;
+	return isPieceMovedAKing & isCastleTraveling;
 }
 
-bool BoardRepresentation::isMoveEnPassant(Notation move)
+bool BoardRepresentation::doesMovePermitEnPassant(Notation move)
 {
 	//TO DO
 	return false;

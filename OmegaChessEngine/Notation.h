@@ -4,6 +4,7 @@
 #include <string>
 #include "InvalidChessCaseException.h"
 #include <unordered_map>
+#include "Piece.h"
 
 /* Representation of a chess move that a piece have from
    a case to another.*/
@@ -12,6 +13,7 @@ struct Notation
 public:
 	int from;
 	int to;
+	PieceType promotion;
 
 	Notation() = delete;
 
@@ -27,21 +29,26 @@ public:
 	   8  9  10 11 12 13 14 15
 	   0  1  2  3  4  5  6  7 
 	*/ 
-	Notation(int from, int to)
-		: from{from}, to{to}
+
+	Notation(int from, int to, PieceType promotion = PieceType::none)
+		: from{from}, to{to}, promotion{promotion}
 	{
 		auto isOutBound = [](int chessCase) { return (chessCase > 63 || chessCase < 0); };
 		if (isOutBound(from) || isOutBound(to))
 			throw InvalidChessCaseException();
 	}
 
-	int test() { return 1; }
 	std::string getCoordinateAlgebraicNotation()
 	{
 		std::string pureCoordinate;
 		pureCoordinate = chessCaseToAlgebraic(from);
 		pureCoordinate += chessCaseToAlgebraic(to);
 		return pureCoordinate;
+	}
+
+	bool operator==(const Notation &other)
+	{
+		return other.from == this->from && other.to == this->to && other.promotion == this->promotion;
 	}
 
 private:

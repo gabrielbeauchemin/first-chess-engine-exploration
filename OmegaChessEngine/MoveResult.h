@@ -1,13 +1,12 @@
 #ifndef MoveResult_H
 #define MoveResult_h
 
-
-
 struct MoveResult
 {
 	bool isMoveLegal;
 	bool isEndGame;
 	bool isWhiteWinner;
+	bool isStealMate;
 
 	MoveResult()
 		: isMoveLegal{ true }, isEndGame{ false }
@@ -19,8 +18,11 @@ struct MoveResult
 	{
 	}
 
-	MoveResult(bool isMoveLegal, bool isEndGame, bool isWhiteWinner)
-		: isMoveLegal{ isMoveLegal }, isEndGame{ isEndGame }, isWhiteWinner{isWhiteWinner}
+	MoveResult(bool isMoveLegal, bool isEndGame, bool isWhiteWinner, bool isStealMate = false)
+		: isMoveLegal{ isMoveLegal },
+		isEndGame{ isEndGame },
+		isWhiteWinner{isWhiteWinner},
+		isStealMate{isStealMate}
 	{
 	}
 };

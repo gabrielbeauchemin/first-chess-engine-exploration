@@ -17,7 +17,7 @@ namespace UnitTests
 		TEST_METHOD(TestToString)
 		{
 			BoardRepresentation board;
-			/*std::string stringBoard = board.toString();
+			std::string stringBoard = board.toString();
 
 			const std::string validStringBoard =
 				"#################################################\r\n"
@@ -54,7 +54,7 @@ namespace UnitTests
 				"#     #     #     #     #     #     #     #     #\r\n"
 				"#################################################\r\n";
 
-			Assert::AreEqual(stringBoard, validStringBoard);*/
+			Assert::AreEqual(stringBoard, validStringBoard);
 		}
 
 		TEST_METHOD(TestBoardInit)
@@ -106,22 +106,17 @@ namespace UnitTests
 			BoardRepresentation boardRepresentation;
 			for (auto& move : gameMoves)
 			{
-				MoveResult res = boardRepresentation.move(move);
-
-				Assert::IsTrue(res.isMoveLegal);
+				boardRepresentation.move(move);
 
 				//Special cases to check:
 
 				//CheckMate (last move of the game (37,53))
 				if (move.from == 37 && move.to == 53)
 				{
-					Assert::IsTrue(res.isEndGame);
-					Assert::IsTrue(res.isWhiteWinner);
+					//TO DO: one generateMove is done, check that the king has no where to go
 				}
 				else 
 				{
-					Assert::IsFalse(res.isEndGame);
-
 					//En Passant( Move Before En passant (10,26), should permit the En passant move
 					if (move.from == 10 && move.to == 26)
 					{
@@ -135,15 +130,47 @@ namespace UnitTests
 					//King Castle (4,6)
 					else if (move.from == 4 && move.to == 6)
 					{
-						Assert::IsTrue(boardRepresentation.board[6].type == PieceType::king);
-						Assert::IsTrue(boardRepresentation.board[5].type == PieceType::rook);
 						Assert::IsFalse(boardRepresentation.canWhiteCastle);
 						Assert::IsTrue(boardRepresentation.canBlackCastle);
 					}
 				}
 			}
+			std::string validEndGame =
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#     #     #     #  q  #  k  #  b  #  n  #  r  #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#  p  #  b  #     #  p  #  p  #  q  #  p  #  p  #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#  n  #     #  r  #     #     #     #     #     #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#     #     #  p  #     #     #  p  #     #     #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#     #     #  b  #  p  #     #     #     #     #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#     #     #  n  #     #  p  #  n  #     #     #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#  p  #  b  #     #     #     #  p  #  p  #  p  #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#  r  #  p  #     #  q  #     #  r  #  k  #  p  #\r\n"
+				"#     #     #     #     #     #     #     #     #\r\n"
+				"#################################################\r\n";
 
-				
+			Assert::AreEqual(boardRepresentation.toString(), validEndGame);
 		}
 	};
 

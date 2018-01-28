@@ -6,7 +6,6 @@ class BoardRepresentation;
 
 namespace MoveGeneration
 {
-	bool isStateLegal(BoardRepresentation state, Notation lastMove);
 	std::vector<Move> generateMoves(BoardRepresentation board);
 	std::vector<Move> generateRookMoves(BoardRepresentation board, int rookCase);
 	std::vector<Move> generateKnightMoves(BoardRepresentation board, int knightCase);
@@ -16,4 +15,6 @@ namespace MoveGeneration
 	std::vector<Move> generatePawnMoves(BoardRepresentation board, int pawnCase);
 
 	bool isKingCheck(BoardRepresentation board, int pawnCase);
+
+    
 };

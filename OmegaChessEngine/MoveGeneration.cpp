@@ -3,7 +3,7 @@
 
 namespace MoveGeneration
 {
-	const int mailbox[120] = {
+	static const int mailbox[120] = {
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1,  0,  1,  2,  3,  4,  5,  6,  7, -1,
@@ -18,7 +18,7 @@ namespace MoveGeneration
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 	};
 
-	const int mailbox64[64] = {
+	static const int mailbox64[64] = {
 		21, 22, 23, 24, 25, 26, 27, 28,
 		31, 32, 33, 34, 35, 36, 37, 38,
 		41, 42, 43, 44, 45, 46, 47, 48,
@@ -29,8 +29,34 @@ namespace MoveGeneration
 		91, 92, 93, 94, 95, 96, 97, 98
 	};
 
+	static const int knightMoves[] = { -21, -19, -12, -8, 8, 12, 19, 21 };
+	static const int bishopMoves[] = { -11,  -9,  9, 11, 0,  0,  0,  0 };
+	static const int rookMoves[] = { -10,  -1,  1, 10, 0,  0,  0,  0 };
+	static const int queenMoves[] = { -11, -10, -9, -1, 1,  9, 10, 11 };
+	static const int kingMoves[] = { -11, -10, -9, -1, 1,  9, 10, 11 };
+
 	bool isStateLegal(BoardRepresentation state, Notation lastMove)
 	{
+		//Invalid to go to a case that is already occupied
+		/*if (board[move.to].type != PieceType::none)
+			return MoveResult{ false };*/
+
+
+		//Check if the cases between the Castle and the king are empty
+		/*for (int caseInTheWay = move.from + 1; caseInTheWay < move.to; ++caseInTheWay)
+			if (board[caseInTheWay].type != PieceType::none)
+				return MoveResult{ false };*/
+
+		//Valid if the king can Castle
+		//bool isKingSideCastle = move.from < move.to; //If false, we know its a queen sine castle
+		//int translationKingRook = (isKingSideCastle) ? 2 : -3;
+		//bool isRookPresent = board[move.from + translationKingRook].type == PieceType::rook;
+		//bool canKingCastle = (this->isWhiteTurn) ? canWhiteCastle : canBlackCastle;
+		//if (!isRookPresent || !canKingCastle)
+		//{
+		//	return MoveResult{ false }; //King is not allowed to castle
+		//}
+
 		return true;
 	}
 

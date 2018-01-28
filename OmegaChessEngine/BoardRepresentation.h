@@ -20,10 +20,11 @@ public:
 	bool canWhiteCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
-	MoveResult move(Notation move);
+	void move(Notation move);
 	std::string toString();
 
 private: 
+
 	template<class T>
 	void swap(T array[], int i, int j);
 	bool isMoveCastling(Notation move);

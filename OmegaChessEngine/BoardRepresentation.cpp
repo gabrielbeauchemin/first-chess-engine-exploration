@@ -60,6 +60,12 @@ void BoardRepresentation::move(Notation move)
 				this->canBlackCastle = false;
 		}
 
+		//In case of Capture. Dont validate the color of the captured piece, generate Move should generate legal moves
+		if (board[move.to].type != PieceType::none)
+		{
+			board[move.to].type = PieceType::none;
+		}
+
 		//Move the piece
 		swap<Piece>(board, move.from, move.to);
 		isWhiteTurn = !this->isWhiteTurn;

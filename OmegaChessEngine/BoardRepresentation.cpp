@@ -32,6 +32,24 @@ BoardRepresentation::BoardRepresentation()
 	board[60] = blackKing; board[61] = blackBishop; board[62] = blackKnight; board[63] = blackRook;
 }
 
+BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piecesToPlace)
+	: isWhiteTurn{ true },
+	canBlackCastle{ true },
+	canWhiteCastle{ true },
+	reversibleMovesInRow{ 0 }
+{
+	Piece emptyCase = Piece{ PieceType::none, false };
+	this->isEnPensantPossible = std::pair<bool, Piece>(false, emptyCase);
+
+	//Put an empty board
+	for (int i = 0; i < 64; ++i)
+		this->board[i] = emptyCase;
+
+	//Place the pieces requested
+	for (auto& pieceToPlace : piecesToPlace)
+		this->board[pieceToPlace.first] = pieceToPlace.second;
+}
+
 //Only move the piece requested without checking for the
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::move(Notation move)

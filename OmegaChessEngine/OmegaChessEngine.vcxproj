@@ -118,7 +118,6 @@
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />
     <ClInclude Include="InvalidChessCaseException.h" />
-    <ClInclude Include="Move.h" />
     <ClInclude Include="MoveGeneration.hpp" />
     <ClInclude Include="MoveResult.h" />
     <ClInclude Include="Notation.h" />

@@ -50,9 +50,6 @@
     <ClInclude Include="NotImplementedException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
-    <ClInclude Include="Move.h">
-      <Filter>Header Files\BoardRepresentation</Filter>
-    </ClInclude>
     <ClInclude Include="MoveResult.h">
       <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>

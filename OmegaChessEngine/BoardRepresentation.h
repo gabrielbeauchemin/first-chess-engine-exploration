@@ -12,6 +12,8 @@ class BoardRepresentation
 {
 public:
 	BoardRepresentation();
+
+	BoardRepresentation(std::vector<std::pair<int, Piece>> piecesToPlace);
 	
 	Piece board[64];
 	bool isWhiteTurn;

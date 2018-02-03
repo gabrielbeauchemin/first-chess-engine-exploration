@@ -14,5 +14,5 @@ namespace MoveGeneration
 	std::vector<Notation> generatePawnMoves(BoardRepresentation board, int pawnCase);
 
 	int getMailboxIndex(int boardIndex);
-	bool isKingCheck(BoardRepresentation board, int pawnCase);
+	bool isKingCheck(BoardRepresentation board, int kingCase);
 };

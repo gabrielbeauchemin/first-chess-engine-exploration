@@ -43,20 +43,20 @@ namespace MoveGeneration
 			return MoveResult{ false };*/
 
 
-		//Check if the cases between the Castle and the king are empty
-		/*for (int caseInTheWay = move.from + 1; caseInTheWay < move.to; ++caseInTheWay)
-			if (board[caseInTheWay].type != PieceType::none)
-				return MoveResult{ false };*/
+			//Check if the cases between the Castle and the king are empty
+			/*for (int caseInTheWay = move.from + 1; caseInTheWay < move.to; ++caseInTheWay)
+				if (board[caseInTheWay].type != PieceType::none)
+					return MoveResult{ false };*/
 
-		//Valid if the king can Castle
-		//bool isKingSideCastle = move.from < move.to; //If false, we know its a queen sine castle
-		//int translationKingRook = (isKingSideCastle) ? 2 : -3;
-		//bool isRookPresent = board[move.from + translationKingRook].type == PieceType::rook;
-		//bool canKingCastle = (this->isWhiteTurn) ? canWhiteCastle : canBlackCastle;
-		//if (!isRookPresent || !canKingCastle)
-		//{
-		//	return MoveResult{ false }; //King is not allowed to castle
-		//}
+					//Valid if the king can Castle
+					//bool isKingSideCastle = move.from < move.to; //If false, we know its a queen sine castle
+					//int translationKingRook = (isKingSideCastle) ? 2 : -3;
+					//bool isRookPresent = board[move.from + translationKingRook].type == PieceType::rook;
+					//bool canKingCastle = (this->isWhiteTurn) ? canWhiteCastle : canBlackCastle;
+					//if (!isRookPresent || !canKingCastle)
+					//{
+					//	return MoveResult{ false }; //King is not allowed to castle
+					//}
 
 		return true;
 	}
@@ -70,7 +70,7 @@ namespace MoveGeneration
 			PieceType typeOfCase = currentPiece.type;
 
 			//Move the pieces of the color which is turn to play
-			if (currentPiece.isWhite != boardRepresentation.isWhiteTurn) 
+			if (currentPiece.isWhite != boardRepresentation.isWhiteTurn)
 				break;
 
 			if (typeOfCase == PieceType::none)
@@ -109,7 +109,7 @@ namespace MoveGeneration
 	std::vector<Notation> generateRookMoves(BoardRepresentation boardRepresentation, int rookCase)
 	{
 		std::vector<Notation> moves;
-		
+
 		//Each iteration, move the piece of one case in the direction it can move to generate the moves
 		for (const int& currentOffset : rookOffset)
 		{
@@ -128,11 +128,11 @@ namespace MoveGeneration
 
 					//its a capture or the piece got blocked by a piece of its camp, 
 					//in both case pass to the next direction
-					break; 
+					break;
 				}
 
 				//The case is empty
-				moves.push_back(Notation{ rookCase,currentCaseIndex }); 
+				moves.push_back(Notation{ rookCase,currentCaseIndex });
 			}
 		}
 
@@ -183,7 +183,7 @@ namespace MoveGeneration
 				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
 				if (currentCaseIndex == -1) break; //Outside of the board
 
-		        //The case is occupied
+				//The case is occupied
 				if (boardRepresentation.board[currentCaseIndex].type != PieceType::none)
 				{
 					if (boardRepresentation.board[currentCaseIndex].isWhite != boardRepresentation.isWhiteTurn)
@@ -219,7 +219,7 @@ namespace MoveGeneration
 				if (boardRepresentation.board[currentCaseIndex].isWhite != boardRepresentation.isWhiteTurn)
 					moves.push_back(Notation{ kingCase,currentCaseIndex }); //Capture
 
-			    //its a capture or the piece got blocked by a piece of its camp, 
+				//its a capture or the piece got blocked by a piece of its camp, 
 				//in both case pass to the next direction																
 				continue;
 			}
@@ -245,7 +245,7 @@ namespace MoveGeneration
 				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
 				if (currentCaseIndex == -1) break; //Outside of the board
 
-	           //The case is occupied
+			   //The case is occupied
 				if (boardRepresentation.board[currentCaseIndex].type != PieceType::none)
 				{
 					if (boardRepresentation.board[currentCaseIndex].isWhite != boardRepresentation.isWhiteTurn)
@@ -268,9 +268,97 @@ namespace MoveGeneration
 		throw NotImplementedException{};
 	}
 
-	bool isKingCheck(BoardRepresentation board, int pawnCase)
+	bool isKingCheck(BoardRepresentation boardRepresentation, int kingCase)
 	{
+		//Each iteration, move the king in diagonal
+		//If he meets bishop or queen or pawn from the opposite camp, hes in check
+		for (const int& currentOffset : bishopOffset /*Diagonal Moves*/)
+		{
+			int currentCaseIndex = kingCase;
+			//Generate all possible moves in the direction the current diagon
+			while (true)
+			{
+				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+				if (currentCaseIndex == -1) break; //Outside of the board
+
+				//King meets a piece
+				auto currentCase = boardRepresentation.board[currentCaseIndex];
+				if (currentCase.type != PieceType::none)
+				{
+					//King meets a bishop or queen or pawn from opposite camp, hes in check
+					if (currentCase.isWhite != boardRepresentation.isWhiteTurn
+						&& (currentCase.type == PieceType::queen ||
+							currentCase.type == PieceType::bishop ||
+							currentCase.type == PieceType::pawn))
+					{
+						return true;
+					}
+					//He meets a piece of its own camp or a piece from the opposite camp
+					//That cant put him in check. Look into another direction
+					else
+					{
+						break;
+					}
+				}
+
+				//The case is empty, nothing to do, continue searching in this direction
+			}
+		}
+
+		//Each iteration, move the king in lines
+		//If he meets rook or queen from the opposite camp, hes in check
+		for (const int& currentOffset : rookOffset /*Moves in line*/)
+		{
+			int currentCaseIndex = kingCase;
+			//Generate all possible moves in the direction the current offset
+			while (true)
+			{
+				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+				if (currentCaseIndex == -1) break; //Outside of the board
+
+				//King meets a piece
+				auto currentCase = boardRepresentation.board[currentCaseIndex];
+				if (currentCase.type != PieceType::none)
+				{
+					//King meets a rook or queen from opposite camp, hes in check
+					if (currentCase.isWhite != boardRepresentation.isWhiteTurn
+						&& (currentCase.type == PieceType::queen || currentCase.type == PieceType::rook))
+					{
+						return true;
+					}
+					//He meets a piece of its own camp or a piece from the opposite camp
+					//That cant put him in check. Look into another direction
+					else
+					{
+						break;
+					}
+				}
+
+				//The case is empty, nothing to do, continue searching in this direction
+			}
+		}
+
+		//Move the king like a knight: 
+		//If he meets a knight from the opposite camp, hes in check
+		for (const int& currentOffset : knightOffset)
+		{
+			int currentCaseIndex = kingCase;
+			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+
+			if (currentCaseIndex == -1) continue; //Outside of the board
+
+			auto currentCase = boardRepresentation.board[currentCaseIndex];
+			//King meets a rook or queen from opposite camp, hes in check
+			if (currentCase.isWhite != boardRepresentation.isWhiteTurn
+				&& currentCase.type == PieceType::knight)
+			{
+				return true;
+			}
+		}
+
+		//King didnt find any pieces of the opposite camp that are attacking him
 		return false;
+
 	}
 }
 

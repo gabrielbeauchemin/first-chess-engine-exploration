@@ -56,5 +56,8 @@
     <ClInclude Include="MoveGeneration.hpp">
       <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>
+    <ClInclude Include="IlegalMoveException.h">
+      <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

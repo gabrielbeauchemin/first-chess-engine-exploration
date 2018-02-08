@@ -1,4 +1,5 @@
 #include "BoardRepresentation.h"
+#include "IlegalMoveException.h"
 
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
@@ -7,7 +8,7 @@ BoardRepresentation::BoardRepresentation()
 	reversibleMovesInRow{ 0 }
 {
 	Piece emptyCase = Piece{ PieceType::none, false };
-	this->isEnPensantPossible = std::pair<bool, Piece>(false, emptyCase);
+	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 
 	//Initialize board with beginning position
 	Piece whiteQueen = Piece{ PieceType::queen, true };
@@ -39,7 +40,7 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 	reversibleMovesInRow{ 0 }
 {
 	Piece emptyCase = Piece{ PieceType::none, false };
-	this->isEnPensantPossible = std::pair<bool, Piece>(false, emptyCase);
+	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 
 	//Put an empty board
 	for (int i = 0; i < 64; ++i)
@@ -54,18 +55,29 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::move(Notation move)
 {  
+	if (this->board[move.from].isWhite != this->isWhiteTurn)
+	{
+		throw IlegalMoveException{};
+	}
+
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.from, move.to); //Swap King
 		bool isKingSideCastling = (move.from - move.to < 0) ? true : false;
-		int rookPos = (isKingSideCastling) ? 7 : 0;
-		int newRookPos = (isKingSideCastling) ? 5 : 3;
-		swap<Piece>(board, rookPos, newRookPos); //Swap Rook
+		int rookPos;
+		if (this->isWhiteTurn && isKingSideCastling) rookPos = 7;
+		else if (this->isWhiteTurn && !isKingSideCastling) rookPos = 0;
+		else if (!this->isWhiteTurn && isKingSideCastling) rookPos = 63;
+		else if (!this->isWhiteTurn && !isKingSideCastling) rookPos = 56;
+		int translationRook = (isKingSideCastling) ? -2 : 3;
+		swap<Piece>(board, rookPos, rookPos + translationRook); //Swap Rook
 
 		if (isWhiteTurn)
 			this->canWhiteCastle = false;
 		else
 			this->canBlackCastle = false;
+
+		isWhiteTurn = !this->isWhiteTurn;
 	}
 	else //Not Castling, normal move
 	{
@@ -99,15 +111,12 @@ void BoardRepresentation::move(Notation move)
 	}
 
 	//En passant is only good for one move
-	this->isEnPensantPossible = std::pair<bool, Piece>(false, Piece{});
+	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 	//Check if En passant in possible for the next move
-	if (doesMovePermitEnPassant(move))
+	if (movesPermitEnPassant(move))
 	{
-		this->isEnPensantPossible =
-			std::pair<bool, Piece>(true, this->board[move.from]);
+		this->isEnPensantPossible = std::pair<bool, int>(true, move.to);
 	};
-	
-	//Build MoveResult
 }
 
 std::string BoardRepresentation::toString()
@@ -152,36 +161,23 @@ std::string BoardRepresentation::toString()
 
 bool BoardRepresentation::isMoveCastling(Notation move)
 {
-	if(isWhiteTurn)
-	{
-		if(!canWhiteCastle)
-		{
-			return false;
-		}
-	}
-	else
-	{
-		if (!canBlackCastle)
-		{
-			return false;
-		}
-	}
-
-	bool isPieceMovedAKing = board[move.from].type == PieceType::king;
-	bool isCastleTraveling = move.from + 2 == move.to || move.from - 2 == move.to;
-	return isPieceMovedAKing & isCastleTraveling;
+	Notation allCastlingMoves[]{ Notation{4,6}, Notation{ 4,2 }, Notation{ 60,62 }, Notation{ 60,58 } };
+	for (auto& m : allCastlingMoves)
+		if (m == move)
+			return true;
+	return false;
 }
 
-bool BoardRepresentation::doesMovePermitEnPassant(Notation lastMove)
+bool BoardRepresentation::movesPermitEnPassant(Notation lastMove)
 {
 	if (board[lastMove.to].type != PieceType::pawn)
 		return false;
 
 	//If the move permit En Passant, that means that its a pawn 
 	//that advance two cases and a pawn from the opposite camp
-	//Is one move next to it (in the other column)
+	//Is one case to its side
 
-	//Exception Pawn at the beginning and the end of the board has only one case next to it
+	//Pawn at the beginning and the end of the board has only one case next to it
 	//Which are Cases 8 and 15 (white) and 48 and 55 
 	bool isFirstPawn = lastMove.from % 8 == 0;
 	bool isLastPawn = lastMove.from % 8 == 7;
@@ -189,21 +185,24 @@ bool BoardRepresentation::doesMovePermitEnPassant(Notation lastMove)
 	if (isFirstPawn)
 	{
 		return board[lastMove.to + 1].type == PieceType::pawn && 
-			   board[lastMove.to + 1].isWhite == this->isWhiteTurn; //isWhiteTurn represent the turn of the opposite camp, so the pawn should be the same color
+			   board[lastMove.to + 1].isWhite != this->isWhiteTurn; //Pawn to the side must be from opposite camp
 	}
 	else if(isLastPawn)
 	{
 		return board[lastMove.to - 1].type == PieceType::pawn &&
-			   board[lastMove.to - 1].isWhite == this->isWhiteTurn; //isWhiteTurn represent the turn of the opposite camp, so the pawn should be the same color
+			   board[lastMove.to - 1].isWhite != this->isWhiteTurn; //Pawn to the side must be from opposite camp
 	}
-	else 
+	else //Pawn in the middles, check both side of them
 	{
-		return (board[lastMove.to + 1].type == PieceType::pawn &&
-			    board[lastMove.to + 1].isWhite == this->isWhiteTurn) || //isWhiteTurn represent the turn of the opposite camp, so the pawn should be the same color
-			   (board[lastMove.to - 1].type == PieceType::pawn &&
-			    board[lastMove.to - 1].isWhite == this->isWhiteTurn); //isWhiteTurn represent the turn of the opposite camp, so the pawn should be the same color
+		bool oppositePawnLeftSide = (board[lastMove.to + 1].type == PieceType::pawn &&
+			                        board[lastMove.to + 1].isWhite != board[lastMove.to].isWhite); //Pawn to the side must be from opposite camp
+		bool oppositePawnRightSide = (board[lastMove.to - 1].type == PieceType::pawn &&
+			                         board[lastMove.to - 1].isWhite != board[lastMove.to].isWhite); //Pawn to the side must be from opposite camp
+		//At least one pawn from opposite camp should be to its side to permit en passant
+		return oppositePawnLeftSide || oppositePawnRightSide;
 	}
 }
+
 template<class T>
 void BoardRepresentation::swap(T array[], int i, int j)
 {

@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />
+    <ClInclude Include="IlegalMoveException.h" />
     <ClInclude Include="InvalidChessCaseException.h" />
     <ClInclude Include="MoveGeneration.hpp" />
     <ClInclude Include="MoveResult.h" />

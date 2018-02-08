@@ -12,7 +12,7 @@ namespace UnitTests
 	{
 	public:
 		
-		TEST_METHOD(TestGetCoordinateAlgebraicNotationCorners)
+		TEST_METHOD(GetCoordinateAlgebraicNotationCorners)
 		{
 			//Test all corners (limit case)
 			Notation corner1and2{ 0, 7 };
@@ -22,14 +22,14 @@ namespace UnitTests
 			Assert::IsTrue(corner3and4.getCoordinateAlgebraicNotation() == "a8h8");
 		}
 
-		TEST_METHOD(TestGetCoordinateAlgebraicNotationOutBound)
+		TEST_METHOD(GetCoordinateAlgebraicNotationOutBound)
 		{
 			//Outbound position should fail at construction
 			Assert::ExpectException<InvalidChessCaseException>([] { Notation corner1and2{ -1, 23 }; });
 			Assert::ExpectException<InvalidChessCaseException>([] { Notation corner1and2{ 35, 64 }; });
 		}
 
-		TEST_METHOD(TestGetCoordinateAlgebraicNotationRandomCases)
+		TEST_METHOD(GetCoordinateAlgebraicNotationRandomCases)
 		{
 			Notation corner1and2{ 23, 34 };
 			Notation corner3and4{ 11, 14 };

@@ -17,7 +17,7 @@ public:
 	
 	Piece board[64];
 	bool isWhiteTurn;
-	std::pair<bool, Piece> isEnPensantPossible;
+	std::pair<bool, int> isEnPensantPossible; //is it possible and if yes which pawn position can be eaten en passant
 	bool canBlackCastle;
 	bool canWhiteCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
@@ -30,7 +30,7 @@ private:
 	template<class T>
 	void swap(T array[], int i, int j);
 	bool isMoveCastling(Notation move);
-	bool doesMovePermitEnPassant(Notation move);
+	bool movesPermitEnPassant(Notation move);
 };
 
 #endif

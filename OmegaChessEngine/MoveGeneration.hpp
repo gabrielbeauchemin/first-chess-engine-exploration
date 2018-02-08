@@ -5,14 +5,17 @@ class BoardRepresentation;
 
 namespace MoveGeneration
 {
-	std::vector<Notation> generateMoves(BoardRepresentation board);
-	std::vector<Notation> generateRookMoves(BoardRepresentation board, int rookCase);
-	std::vector<Notation> generateKnightMoves(BoardRepresentation board, int knightCase);
-	std::vector<Notation> generateBishopMoves(BoardRepresentation board, int bishopCase);
-	std::vector<Notation> generateKingMoves(BoardRepresentation board, int kingCase);
-	std::vector<Notation> generateQueenMoves(BoardRepresentation board, int queenCase);
-	std::vector<Notation> generatePawnMoves(BoardRepresentation board, int pawnCase);
+	std::vector<Notation> generateMoves(BoardRepresentation& board);
+	std::vector<Notation> generateRookMoves(BoardRepresentation& board, int rookCase);
+	std::vector<Notation> generateKnightMoves(BoardRepresentation& board, int knightCase);
+	std::vector<Notation> generateBishopMoves(BoardRepresentation& board, int bishopCase);
+	std::vector<Notation> generateKingMoves(BoardRepresentation& board, int kingCase);
+	std::vector<Notation> generateCastlingMoves(BoardRepresentation& board, int kingCase);
+	std::vector<Notation> generateQueenMoves(BoardRepresentation& board, int queenCase);
+	std::vector<Notation> generatePawnMoves(BoardRepresentation& board, int pawnCase);
+	Notation generatePawnMoves(BoardRepresentation& board, int pawnCase, PieceType promotion);
 
-	int getMailboxIndex(int boardIndex);
-	bool isKingCheck(BoardRepresentation board, int kingCase);
+	bool isPieceAttacked(BoardRepresentation& board, int pieceCase);
+	bool isPieceInAbsolutePin(BoardRepresentation& board, int pieceCase, int kingCase);
+	bool isPawnMovePromotion(BoardRepresentation& boardRepresentation, int pawnCase);
 };

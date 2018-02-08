@@ -14,7 +14,7 @@ namespace UnitTests
 	{
 	public:
 
-		TEST_METHOD(TestToString)
+		TEST_METHOD(ToString)
 		{
 			BoardRepresentation board;
 			std::string stringBoard = board.toString();
@@ -57,7 +57,7 @@ namespace UnitTests
 			Assert::AreEqual(stringBoard, validStringBoard);
 		}
 
-		TEST_METHOD(TestBoardInit)
+		TEST_METHOD(BoardInit)
 		{
 			BoardRepresentation board;
 
@@ -95,7 +95,7 @@ namespace UnitTests
 			Assert::AreEqual(nbrEmptyCase, 32);
 		}
 
-		TEST_METHOD(TestPlayCompleteGame)
+		TEST_METHOD(PlayCompleteGame)
 		{
 			//Random game that includes all kind of moves to test the board representation
 		    //It includes a kings side castle, an en passant, a promotion, a checkmate
@@ -125,7 +125,8 @@ namespace UnitTests
 					//Promotion move (9,2)
 					else if (move.from == 9 && move.to == 2)
 					{
-						boardRepresentation.board[2].type = PieceType::queen;
+						Assert::IsTrue(boardRepresentation.board[2].type == PieceType::queen);
+						Assert::IsTrue(boardRepresentation.board[2].isWhite == false);
 					}
 					//King Castle (4,6)
 					else if (move.from == 4 && move.to == 6)

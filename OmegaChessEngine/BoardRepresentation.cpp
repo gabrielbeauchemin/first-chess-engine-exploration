@@ -55,7 +55,9 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::move(Notation move)
 {  
-	if (this->board[move.from].isWhite != this->isWhiteTurn)
+	//Help for debugs, comment for release mode
+	if (this->board[move.from].isWhite != this->isWhiteTurn ||
+		this->board[move.from].type == PieceType::none)
 	{
 		throw IlegalMoveException{};
 	}

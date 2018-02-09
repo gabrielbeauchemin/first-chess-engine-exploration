@@ -7,6 +7,7 @@
 #include "string"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace MoveGeneration;
 
 namespace UnitTests
 {
@@ -113,7 +114,9 @@ namespace UnitTests
 				//CheckMate (last move of the game (37,53))
 				if (move.from == 37 && move.to == 53)
 				{
-					//TO DO: one generateMove is done, check that the king has no where to go
+					Assert::IsTrue(isPieceAttacked(boardRepresentation, move.to));
+					auto kingMoves = generateKingMoves(boardRepresentation, 60);
+					Assert::AreEqual(0, (int)kingMoves.size());
 				}
 				else 
 				{
@@ -170,7 +173,7 @@ namespace UnitTests
 				"#  r  #     #     #     #     #  r  #  k  #     #\r\n"
 				"#     #     #     #     #     #     #     #     #\r\n"
 				"#################################################\r\n";
-
+			auto t = boardRepresentation.toString();
 			Assert::AreEqual(boardRepresentation.toString(), validEndGame);
 		}
 	};

@@ -36,7 +36,7 @@ namespace MoveGeneration
 	static const std::vector<int> queenOffset = { -11, -10, -9, -1, 1,  9, 10, 11 };
 	static const std::vector<int> kingOffset = { -11, -10, -9, -1, 1,  9, 10, 11 };
 
-	bool isStateLegal(BoardRepresentation state, Notation lastMove)
+	bool isStateLegal(const BoardRepresentation state, Notation lastMove)
 	{
 		
 			//Check if the cases between the Castle and the king are empty
@@ -57,7 +57,7 @@ namespace MoveGeneration
 		return true;
 	}
 
-	std::vector<Notation> generateMoves(BoardRepresentation& boardRepresentation)
+	std::vector<Notation> generateMoves(const BoardRepresentation& boardRepresentation)
 	{
 		//Find king index
 		int kingIndex;
@@ -101,7 +101,7 @@ namespace MoveGeneration
 				}
 				else if (typeOfCase == PieceType::pawn)
 				{
-					if (isPawnMovePromotion)
+					if (isPawnMovePromotion(boardRepresentation, caseIndex))
 					{
 						std::vector<PieceType> possiblePromotion{ PieceType::bishop,PieceType::knight,PieceType::queen, PieceType::rook };
 						for (auto& promotionType : possiblePromotion)
@@ -150,7 +150,7 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	std::vector<Notation> generateRookMoves(BoardRepresentation& boardRepresentation, int rookCase)
+	std::vector<Notation> generateRookMoves(const BoardRepresentation& boardRepresentation, int rookCase)
 	{
 		std::vector<Notation> moves;
 
@@ -174,16 +174,19 @@ namespace MoveGeneration
 					//in both case pass to the next direction
 					break;
 				}
-
-				//The case is empty
-				moves.push_back(Notation{ rookCase,currentCaseIndex });
+				else //The case is empty
+				{
+					
+					moves.push_back(Notation{ rookCase,currentCaseIndex });
+				}
+				
 			}
 		}
 
 		return moves;
 	}
 
-	std::vector<Notation> generateKnightMoves(BoardRepresentation& boardRepresentation, int knightCase)
+	std::vector<Notation> generateKnightMoves(const BoardRepresentation& boardRepresentation, int knightCase)
 	{
 		std::vector<Notation> moves;
 
@@ -205,15 +208,17 @@ namespace MoveGeneration
 				//in both case pass to the next direction																
 				continue;
 			}
+			else //The case is empty
+			{
+				moves.push_back(Notation{ knightCase,currentCaseIndex });
 
-			//The case is empty
-			moves.push_back(Notation{ knightCase,currentCaseIndex });
+			}
 		}
 
 		return moves;
 	}
 
-	std::vector<Notation> generateBishopMoves(BoardRepresentation& boardRepresentation, int bishopCase)
+	std::vector<Notation> generateBishopMoves(const BoardRepresentation& boardRepresentation, int bishopCase)
 	{
 		std::vector<Notation> moves;
 
@@ -236,9 +241,10 @@ namespace MoveGeneration
 					//in both case pass to the next direction
 					break;
 				}
-
-				//The case is empty
-				moves.push_back(Notation{ bishopCase,currentCaseIndex });
+				else //The case is empty
+				{
+					moves.push_back(Notation{ bishopCase,currentCaseIndex });
+				}
 			}
 		}
 
@@ -246,7 +252,7 @@ namespace MoveGeneration
 	}
 
 	//Do not include the castling move to be more modular
-	std::vector<Notation> generateKingMoves(BoardRepresentation& boardRepresentation, int kingCase)
+	std::vector<Notation> generateKingMoves(const BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		std::vector<Notation> moves;
 
@@ -258,26 +264,33 @@ namespace MoveGeneration
 			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
 			if (currentCaseIndex == -1) continue; //Outside of the board
 
-												//The case is occupied
+			//The case is occupied
 			if (boardRepresentation.board[currentCaseIndex].type != PieceType::none)
 			{
+				//Capture opposite piece
 				if (boardRepresentation.board[currentCaseIndex].isWhite != boardRepresentation.isWhiteTurn)
-					moves.push_back(Notation{ kingCase,currentCaseIndex }); //Capture
+				{
+					//The opposite piece should not be protected to be captured by the king
+					if(!isPieceAttacked(boardRepresentation, currentCaseIndex))
+					   moves.push_back(Notation{ kingCase,currentCaseIndex }); 
+				}
 
 				//its a capture or the piece got blocked by a piece of its camp, 
 				//in both case pass to the next direction																
 				continue;
 			}
-
-			//The case is empty
-			moves.push_back(Notation{ kingCase,currentCaseIndex });
+			else //The case is empty
+			{
+				moves.push_back(Notation{ kingCase,currentCaseIndex });
+			}
+			
 		}
 
 		return moves;
 	}
 
 	//Do not check if king is in check, it is checked in generateMoves
-	std::vector<Notation> MoveGeneration::generateCastlingMoves(BoardRepresentation& boardRepresentation, int kingCase)
+	std::vector<Notation> generateCastlingMoves(const BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		std::vector<Notation> possibleCastlings;
 		std::vector<Notation> castlingMoves = (boardRepresentation.isWhiteTurn)
@@ -313,7 +326,7 @@ namespace MoveGeneration
 		return possibleCastlings;
 	}
 
-	std::vector<Notation> generateQueenMoves(BoardRepresentation& boardRepresentation, int queenCase)
+	std::vector<Notation> generateQueenMoves(const BoardRepresentation& boardRepresentation, int queenCase)
 	{
 		std::vector<Notation> moves;
 
@@ -336,9 +349,11 @@ namespace MoveGeneration
 																				  //in both case pass to the next direction
 					break;
 				}
-
-				//The case is empty
-				moves.push_back(Notation{ queenCase,currentCaseIndex });
+				else //The case is empty
+				{
+					moves.push_back(Notation{ queenCase,currentCaseIndex });
+				}
+				
 			}
 		}
 
@@ -346,7 +361,7 @@ namespace MoveGeneration
 	}
 
 	//Does not include the move pawn for a promotion to be more modular, see function generatePawnPromotion
-	std::vector<Notation> generatePawnMoves(BoardRepresentation& boardRepresentation, int pawnCase)
+	std::vector<Notation> generatePawnMoves(const BoardRepresentation& boardRepresentation, int pawnCase)
 	{
 		std::vector<Notation> moves;
 		const int row = 8;
@@ -388,14 +403,14 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	Notation generatePawnMoves(BoardRepresentation& board, int pawnCase, PieceType promotion)
+	Notation generatePawnMoves(const BoardRepresentation& board, int pawnCase, PieceType promotion)
 	{
 		const int row = 8;
 		int step = (board.isWhiteTurn) ? row : -row;
 		return Notation{ pawnCase,pawnCase + step, promotion };
 	}
 
-	bool isPieceAttacked(BoardRepresentation& boardRepresentation, int kingCase)
+	bool isPieceAttacked(const BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		//Each iteration, move the king in diagonal
 		//If he meets bishop or queen or pawn from the opposite camp, hes in check
@@ -488,7 +503,7 @@ namespace MoveGeneration
 
 	}
 
-	bool isPieceInAbsolutePin(BoardRepresentation& boardRepresentation, int pieceCase, int kingCase)
+	bool isPieceInAbsolutePin(BoardRepresentation boardRepresentation, int pieceCase, int kingCase)
 	{
 		//If the piece is in absolute pin, that means that if
 		//It is gone, the king is cheked
@@ -496,7 +511,7 @@ namespace MoveGeneration
 		return isPieceAttacked(boardRepresentation, kingCase);
 	}
 
-	bool isPawnMovePromotion(BoardRepresentation& boardRepresentation, int pawnCaseBeforeMove)
+	bool isPawnMovePromotion(const BoardRepresentation& boardRepresentation, int pawnCaseBeforeMove)
 	{
 		if (boardRepresentation.isWhiteTurn)
 		{

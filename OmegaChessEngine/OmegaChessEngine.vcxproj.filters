@@ -41,9 +41,6 @@
     <ClInclude Include="Piece.h">
       <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>
-    <ClInclude Include="Notation.h">
-      <Filter>Header Files\BoardRepresentation</Filter>
-    </ClInclude>
     <ClInclude Include="InvalidChessCaseException.h">
       <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
@@ -58,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="IlegalMoveException.h">
       <Filter>Header Files\Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="Move.h">
+      <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -101,7 +101,7 @@ namespace UnitTests
 			//Random game that includes all kind of moves to test the board representation
 		    //It includes a kings side castle, an en passant, a promotion, a checkmate
 			//And moves from the bishop, the knights, the rook, the queen and the pawn
-			Notation gameMoves[] = { Notation{12,20}, Notation{49,33}, Notation{6,21}, Notation{33,25}, Notation{10,26}, Notation{25,18}, Notation{11,27}, Notation{18,9}, Notation{5,26}, Notation{9,2,PieceType::queen}, Notation{3,2}, Notation{57,40}, Notation{4,6}, Notation{50,34}, Notation{2,10}, Notation{58,49}, Notation{10,37}, Notation{56, 58}, Notation{1,18}, Notation{58,42}, Notation{37,53} };
+			Move gameMoves[] = { Move{12,20}, Move{49,33}, Move{6,21}, Move{33,25}, Move{10,26}, Move{25,18}, Move{11,27}, Move{18,9}, Move{5,26}, Move{9,2,PieceType::queen}, Move{3,2}, Move{57,40}, Move{4,6}, Move{50,34}, Move{2,10}, Move{58,49}, Move{10,37}, Move{56, 58}, Move{1,18}, Move{58,42}, Move{37,53} };
 							
 			//Play the game and check after each move if eveyrthing is ok
 			BoardRepresentation boardRepresentation;

@@ -3,7 +3,7 @@
 
 #include <utility>  //For pair and make_pair
 #include "Piece.h"
-#include "Notation.h"
+#include "Move.h"
 #include <String>
 #include "MoveResult.h"
 #include "MoveGeneration.hpp"
@@ -22,15 +22,14 @@ public:
 	bool canWhiteCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
-	void move(Notation move);
+	void move(Move move);
 	std::string toString();
 
 private: 
-
 	template<class T>
 	void swap(T array[], int i, int j);
-	bool isMoveCastling(Notation move);
-	bool movesPermitEnPassant(Notation move);
+	bool isMoveCastling(Move move);
+	bool movesPermitEnPassant(Move move);
 };
 
 #endif

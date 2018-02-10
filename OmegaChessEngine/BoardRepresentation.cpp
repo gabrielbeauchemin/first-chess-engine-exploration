@@ -53,7 +53,7 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 
 //Only move the piece requested without checking for the
 //Legality of it (MoveGeneration will do it)
-void BoardRepresentation::move(Notation move)
+void BoardRepresentation::move(Move move)
 {  
 	//Help for debugs, comment for release mode
 	if (this->board[move.from].isWhite != this->isWhiteTurn ||
@@ -80,6 +80,7 @@ void BoardRepresentation::move(Notation move)
 			this->canBlackCastle = false;
 
 		isWhiteTurn = !this->isWhiteTurn;
+		++this->reversibleMovesInRow;
 	}
 	else //Not Castling, normal move
 	{
@@ -92,7 +93,7 @@ void BoardRepresentation::move(Notation move)
 				this->canBlackCastle = false;
 		}
 
-		//In case of Capture. Dont validate the color of the captured piece, generate Move should generate legal moves
+		//In case of Capture
 		if (board[move.to].type != PieceType::none)
 		{
 			board[move.to].type = PieceType::none;
@@ -161,16 +162,16 @@ std::string BoardRepresentation::toString()
 	return stringBoard;
 }
 
-bool BoardRepresentation::isMoveCastling(Notation move)
+bool BoardRepresentation::isMoveCastling(Move move)
 {
-	Notation allCastlingMoves[]{ Notation{4,6}, Notation{ 4,2 }, Notation{ 60,62 }, Notation{ 60,58 } };
+	Move allCastlingMoves[]{ Move{4,6}, Move{ 4,2 }, Move{ 60,62 }, Move{ 60,58 } };
 	for (auto& m : allCastlingMoves)
 		if (m == move)
 			return true;
 	return false;
 }
 
-bool BoardRepresentation::movesPermitEnPassant(Notation lastMove)
+bool BoardRepresentation::movesPermitEnPassant(Move lastMove)
 {
 	if (board[lastMove.to].type != PieceType::pawn)
 		return false;

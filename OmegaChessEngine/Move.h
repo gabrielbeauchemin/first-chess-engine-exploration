@@ -1,5 +1,5 @@
-#ifndef Notation_H
-#define Notation_H 
+#ifndef Move_H
+#define Move_H 
 
 #include <string>
 #include "InvalidChessCaseException.h"
@@ -8,14 +8,14 @@
 
 /* Representation of a chess move that a piece have from
    a case to another.*/
-struct Notation
+struct Move
 {
 public:
 	int from;
 	int to;
 	PieceType promotion;
 
-	Notation() = delete;
+	Move() = delete;
 
 	// The constructor takes two case position in entry: from and to
 	// The notation of a case position is the following:
@@ -30,7 +30,7 @@ public:
 	   0  1  2  3  4  5  6  7 
 	*/ 
 
-	Notation(int from, int to, PieceType promotion = PieceType::none)
+	Move(int from, int to, PieceType promotion = PieceType::none)
 		: from{from}, to{to}, promotion{promotion}
 	{
 		auto isOutBound = [](int chessCase) { return (chessCase > 63 || chessCase < 0); };
@@ -46,7 +46,7 @@ public:
 		return pureCoordinate;
 	}
 
-	bool operator==(const Notation &other)
+	bool operator==(const Move &other)
 	{
 		return other.from == this->from && other.to == this->to && other.promotion == this->promotion;
 	}

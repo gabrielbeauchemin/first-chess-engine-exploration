@@ -1,5 +1,6 @@
 #include "MoveGeneration.hpp"
 #include "NotImplementedException.h"
+#include <algorithm>
 
 namespace MoveGeneration
 {
@@ -73,10 +74,10 @@ namespace MoveGeneration
 		}
 
 		//If the king is cheked
+		bool isKingInCheck = false;
 		if (isPieceAttacked(boardRepresentation, kingIndex))
 		{
-			//That do not include the Castling
-			return generateKingMoves(boardRepresentation, kingIndex);
+			isKingInCheck = true;
 		}
 
 		std::vector<Move> moves;
@@ -107,41 +108,51 @@ namespace MoveGeneration
 						std::vector<PieceType> possiblePromotion{ PieceType::bishop,PieceType::knight,PieceType::queen, PieceType::rook };
 						for (auto& promotionType : possiblePromotion)
 						{
-							Move promotionMove = generatePawnMoves(boardRepresentation, caseIndex, promotionType);
-							moves.push_back(promotionMove);
+							std::vector<Move> promotionMove = generatePawnMoves(boardRepresentation, caseIndex, promotionType);
+							if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, promotionMove, kingIndex);
+							moves.insert(moves.end(), promotionMove.begin(), promotionMove.end());
 						}
 					}
 					else
 					{
 						auto newMoves = generatePawnMoves(boardRepresentation, caseIndex);
+						if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 						moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 					}
 				}
 				else if (typeOfCase == PieceType::bishop)
 				{
 					auto newMoves = generateBishopMoves(boardRepresentation, caseIndex);
+					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
 				else if (typeOfCase == PieceType::knight)
 				{
 					auto newMoves = generateKnightMoves(boardRepresentation, caseIndex);
+					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
 				else if (typeOfCase == PieceType::rook)
 				{
 					auto newMoves = generateRookMoves(boardRepresentation, caseIndex);
+					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
 				else if (typeOfCase == PieceType::king)
 				{
 					auto newMoves = generateKingMoves(boardRepresentation, caseIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
-					newMoves = generateCastlingMoves(boardRepresentation, caseIndex);
-					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
+					if (!isKingInCheck)
+					{
+						newMoves = generateCastlingMoves(boardRepresentation, caseIndex);
+						moves.insert(moves.end(), newMoves.begin(), newMoves.end());
+					}
+					
 				}
 				else if (typeOfCase == PieceType::queen)
 				{
 					auto newMoves = generateQueenMoves(boardRepresentation, caseIndex);
+					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
 			}
@@ -282,7 +293,9 @@ namespace MoveGeneration
 			}
 			else //The case is empty
 			{
-				moves.push_back(Move{ kingCase,currentCaseIndex });
+				//The king should not be in check at this new case
+				if (!isPieceAttacked(boardRepresentation, currentCaseIndex))
+				   moves.push_back(Move{ kingCase,currentCaseIndex });
 			}
 			
 		}
@@ -427,11 +440,11 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	Move generatePawnMoves(const BoardRepresentation& board, int pawnCase, PieceType promotion)
+	std::vector<Move> generatePawnMoves(const BoardRepresentation& board, int pawnCase, PieceType promotion)
 	{
 		const int row = 8;
 		int step = (board.isWhiteTurn) ? row : -row;
-		return Move{ pawnCase,pawnCase + step, promotion };
+		return std::vector<Move>{ Move{ pawnCase,pawnCase + step, promotion }};
 	}
 
 	bool isPieceAttacked(const BoardRepresentation& boardRepresentation, int pieceCase)
@@ -553,6 +566,31 @@ namespace MoveGeneration
 		{
 			return (pawnCaseBeforeMove / 8) == 1;
 		}
+	}
+
+	void filterMovesUncheckingKing(const BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase)
+	{
+		std::remove_if(movesToFilter.begin(), movesToFilter.end(), 
+			[&](const Move & move)
+		{
+			//TO DO: Replace the copy of the board representation by unmake move once its done
+			BoardRepresentation copyBoardRep = boardRepresentation;
+		    copyBoardRep.move(move);
+			return isPieceAttacked(copyBoardRep, kingCase);
+		});
+		
+	}
+
+	bool isKingCheckmate(const BoardRepresentation & boardRepresentation, int kingCase)
+	{
+		return isPieceAttacked(boardRepresentation, kingCase) &&
+			   generateMoves(boardRepresentation).size() == 0;
+	}
+
+	bool isKingStealMate(const BoardRepresentation & boardRepresentation, int kingCase)
+	{
+		return generateMoves(boardRepresentation).size() == 0 &&
+			  !isPieceAttacked(boardRepresentation, kingCase);
 	}
 }
 

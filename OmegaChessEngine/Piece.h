@@ -1,7 +1,7 @@
 #ifndef Piece_H
 #define Piece_H
 
-enum class PieceType
+enum class PieceType : unsigned char
 {
 	king,
 	queen,

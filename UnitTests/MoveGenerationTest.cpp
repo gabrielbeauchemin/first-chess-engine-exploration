@@ -285,10 +285,10 @@ namespace UnitTests
 			std::vector<std::pair<int, Piece>> pawnsPromotionDisposition{
 				{ 53, whitePawn } ,{ 9, blackPawn } };
 			BoardRepresentation boardRepresentation2{ pawnsDisposition };
-			Move promotion = generatePawnMoves(boardRepresentation2, 53, PieceType::queen);
+			Move promotion = generatePawnMoves(boardRepresentation2, 53, PieceType::queen)[0];
 			Assert::IsTrue(promotion.to == 61 && promotion.promotion == PieceType::queen);
 			boardRepresentation2.isWhiteTurn = false; //Black turn
-			promotion = generatePawnMoves(boardRepresentation2, 9, PieceType::knight);
+			promotion = generatePawnMoves(boardRepresentation2, 9, PieceType::knight)[0];
 			Assert::IsTrue(promotion.to == 1 && promotion.promotion == PieceType::knight);
 
 			/*Test Pawn Capture*/
@@ -350,15 +350,36 @@ namespace UnitTests
 
 		}
 
+		TEST_METHOD(KingCheckMate)
+		{
+			auto blackRook = Piece{ PieceType::rook, false };
+			auto whiteKing = Piece{ PieceType::king, true };
+			std::vector<std::pair<int, Piece>> kingCheckMated{
+				{ 4, whiteKing } ,{ 8, blackRook },{ 7, blackRook } };
+			BoardRepresentation boardRepresentation{ kingCheckMated };
+			Assert::IsTrue(isKingCheckmate(boardRepresentation, 4));
+		}
+
+		TEST_METHOD(KingStealMate)
+		{
+			auto blackRook = Piece{ PieceType::rook, false };
+			auto whiteKing = Piece{ PieceType::king, true };
+			std::vector<std::pair<int, Piece>> kingCheckMated{
+				{ 4, whiteKing } ,{ 8, blackRook },{ 59, blackRook },{ 61, blackRook } };
+			BoardRepresentation boardRepresentation{ kingCheckMated };
+			Assert::IsTrue(isKingStealMate(boardRepresentation, 4));
+		}
+
 		TEST_METHOD(Perft)
 		{
-			/*long long nbrNodes = perft(2, BoardRepresentation{});
+			long long nbrNodes = perft(2, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 400);
-			long long nbrNodes = perft(3, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 8902);*/
-			long long nbrNodes = perft(4, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 197281);
-			/*nbrNodes = perft(5, BoardRepresentation{});
+			nbrNodes = perft(3, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 8902);
+			//Uncomment for deepest test (takes times)
+			/*long long nbrNodes = perft(4, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 197281);*/
+			/*long long nbrNodes = perft(5, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 4865609);*/
 		}
 

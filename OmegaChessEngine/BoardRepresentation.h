@@ -5,7 +5,6 @@
 #include "Piece.h"
 #include "Move.h"
 #include <String>
-#include "MoveResult.h"
 #include "MoveGeneration.hpp"
 
 class BoardRepresentation

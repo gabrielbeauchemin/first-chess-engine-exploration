@@ -19,22 +19,40 @@
     <Filter Include="Source Files\BoardRepresentation">
       <UniqueIdentifier>{0815b072-7e0f-4cec-8f73-0ad79cff511c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Exceptions">
-      <UniqueIdentifier>{68596485-3283-415b-a1c8-cf65e40c4134}</UniqueIdentifier>
+    <Filter Include="Header Files\Move Generation">
+      <UniqueIdentifier>{4f0b072f-8fd4-4844-9a75-9086de06dde8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Evaluation">
+      <UniqueIdentifier>{1a82e722-2240-492a-bf9d-52ed7ec259b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Search">
+      <UniqueIdentifier>{cdcaf151-cabe-4734-b899-9aa8f8519082}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Evaluation">
+      <UniqueIdentifier>{1234766b-b35a-4120-a2ec-92885f55f8c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Search">
+      <UniqueIdentifier>{402e53ff-b4f4-46f9-8b6f-a3a33db54f65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MoveGeneration">
+      <UniqueIdentifier>{4eb28513-fc5f-4e96-931c-fed7c17c1adb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardRepresentation.cpp">
       <Filter>Source Files\BoardRepresentation</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="Piece.cpp">
       <Filter>Source Files\BoardRepresentation</Filter>
     </ClCompile>
     <ClCompile Include="MoveGeneration.cpp">
-      <Filter>Source Files\BoardRepresentation</Filter>
+      <Filter>Source Files\MoveGeneration</Filter>
     </ClCompile>
-    <ClCompile Include="Piece.cpp">
-      <Filter>Source Files\BoardRepresentation</Filter>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Evaluation.cpp">
+      <Filter>Source Files\Evaluation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,23 +62,14 @@
     <ClInclude Include="Piece.h">
       <Filter>Header Files\BoardRepresentation</Filter>
     </ClInclude>
-    <ClInclude Include="InvalidChessCaseException.h">
-      <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="NotImplementedException.h">
-      <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="MoveResult.h">
-      <Filter>Header Files\BoardRepresentation</Filter>
+    <ClInclude Include="Move.h">
+      <Filter>Header Files\Move Generation</Filter>
     </ClInclude>
     <ClInclude Include="MoveGeneration.hpp">
-      <Filter>Header Files\BoardRepresentation</Filter>
+      <Filter>Header Files\Move Generation</Filter>
     </ClInclude>
-    <ClInclude Include="IlegalMoveException.h">
-      <Filter>Header Files\Exceptions</Filter>
-    </ClInclude>
-    <ClInclude Include="Move.h">
-      <Filter>Header Files\BoardRepresentation</Filter>
+    <ClInclude Include="Evaluation.h">
+      <Filter>Header Files\Evaluation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

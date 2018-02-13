@@ -115,16 +115,14 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MoveGeneration.cpp" />
     <ClCompile Include="Piece.cpp" />
+    <ClCompile Include="Evaluation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />
-    <ClInclude Include="IlegalMoveException.h" />
-    <ClInclude Include="InvalidChessCaseException.h" />
     <ClInclude Include="MoveGeneration.hpp" />
-    <ClInclude Include="MoveResult.h" />
     <ClInclude Include="Move.h" />
-    <ClInclude Include="NotImplementedException.h" />
     <ClInclude Include="Piece.h" />
+    <ClInclude Include="Evaluation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../OmegaChessEngine/MoveGeneration.hpp"
+#include "../OmegaChessEngine/Piece.h"
+#include "../OmegaChessEngine/Piece.cpp"
+#include "../OmegaChessEngine/BoardRepresentation.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace MoveGeneration;
@@ -13,14 +16,13 @@ namespace UnitTests
 		TEST_METHOD(SimpleKnightMoves)
 		{
 			//Place knight in the center at position e4
-			Piece knight = Piece{ PieceType::knight, true };
-			std::vector<std::pair<int, Piece>> knightCenter{ std::pair<int,Piece> {28, knight } };
+			std::vector<std::pair<int, Piece>> knightCenter{ std::pair<int,Piece> {28, Piece::whiteKnight } };
 			BoardRepresentation boardRepresentation{ knightCenter };
 			int nbrPossibleMoves = generateKnightMoves(boardRepresentation, 28).size();
 			Assert::AreEqual(nbrPossibleMoves, 8);
 
 			//Place knight in the center at position b2
-			std::vector<std::pair<int, Piece>> knightCorner{ std::pair<int,Piece> {9, knight } };
+			std::vector<std::pair<int, Piece>> knightCorner{ std::pair<int,Piece> {9, Piece::whiteKnight } };
 			BoardRepresentation boardRepresentation2{ knightCorner };
 			nbrPossibleMoves = generateKnightMoves(boardRepresentation2, 9).size();
 			Assert::AreEqual(nbrPossibleMoves, 4);
@@ -29,14 +31,13 @@ namespace UnitTests
 		TEST_METHOD(SimpleBishopMoves)
 		{
 			//Place knight in the center at position e4
-			Piece bishop = Piece{ PieceType::bishop, true };
-			std::vector<std::pair<int, Piece>> bishopCenter{ std::pair<int,Piece> {28, bishop } };
+			std::vector<std::pair<int, Piece>> bishopCenter{ std::pair<int,Piece> {28, Piece::whiteBishop } };
 			BoardRepresentation boardRepresentation{ bishopCenter };
 			int nbrPossibleMoves = generateBishopMoves(boardRepresentation, 28).size();
 			Assert::AreEqual(nbrPossibleMoves, 13);
 
 			//Place knight in the center at position b2
-			std::vector<std::pair<int, Piece>> bishopCorner{ std::pair<int,Piece> {9, bishop } };
+			std::vector<std::pair<int, Piece>> bishopCorner{ std::pair<int,Piece> {9, Piece::whiteBishop } };
 			BoardRepresentation boardRepresentation2{ bishopCorner };
 			nbrPossibleMoves = generateBishopMoves(boardRepresentation2, 9).size();
 			Assert::AreEqual(nbrPossibleMoves, 9);
@@ -45,14 +46,13 @@ namespace UnitTests
 		TEST_METHOD(SimpleQueenMoves)
 		{
 			//Place knight in the center at position e4
-			Piece queen = Piece{ PieceType::queen, true };
-			std::vector<std::pair<int, Piece>> queenCenter{ std::pair<int,Piece> {28, queen } };
+			std::vector<std::pair<int, Piece>> queenCenter{ std::pair<int,Piece> {28, Piece::whiteQueen } };
 			BoardRepresentation boardRepresentation{ queenCenter };
 			int nbrPossibleMoves = generateQueenMoves(boardRepresentation, 28).size();
 			Assert::AreEqual(nbrPossibleMoves, 27);
 
 			//Place knight in the center at position b2
-			std::vector<std::pair<int, Piece>> queenCorner{ std::pair<int,Piece> {9, queen } };
+			std::vector<std::pair<int, Piece>> queenCorner{ std::pair<int,Piece> {9, Piece::whiteQueen } };
 			BoardRepresentation boardRepresentation2{ queenCorner };
 			nbrPossibleMoves = generateQueenMoves(boardRepresentation2, 9).size();
 			Assert::AreEqual(nbrPossibleMoves, 23);
@@ -61,14 +61,13 @@ namespace UnitTests
 		TEST_METHOD(SimpleKingMoves)
 		{
 			//Place knight in the center at position e4
-			Piece king = Piece{ PieceType::king, true };
-			std::vector<std::pair<int, Piece>> kingCenter{ std::pair<int,Piece> {28, king } };
+			std::vector<std::pair<int, Piece>> kingCenter{ std::pair<int,Piece> {28, Piece::whiteKing } };
 			BoardRepresentation boardRepresentation{ kingCenter };
 			int nbrPossibleMoves = generateKingMoves(boardRepresentation, 28).size();
 			Assert::AreEqual(nbrPossibleMoves, 8);
 
 			//Place knight in the center at position a1
-			std::vector<std::pair<int, Piece>> kingCorner{ std::pair<int,Piece> {0, king } };
+			std::vector<std::pair<int, Piece>> kingCorner{ std::pair<int,Piece> {0, Piece::whiteKing } };
 			BoardRepresentation boardRepresentation2{ kingCorner };
 			nbrPossibleMoves = generateKingMoves(boardRepresentation2, 0).size();
 			Assert::AreEqual(nbrPossibleMoves, 3);
@@ -77,56 +76,50 @@ namespace UnitTests
 		TEST_METHOD(KingInCheked)
 		{
 			/* Rook check the king*/
-			Piece whiteKing = Piece{ PieceType::king, true };
-			Piece blackRook = Piece{ PieceType::rook, false };
 			std::vector<std::pair<int, Piece>> kingRookCheck{  
-			{2, whiteKing } ,{ 58, blackRook } };
+			{2, Piece::whiteKing } ,{ 58, Piece::blackRook } };
 			std::vector<std::pair<int, Piece>> kingRookCheck2{ 
-			{2, whiteKing } ,{ 7, blackRook } };
+			{2, Piece::whiteKing } ,{ 7, Piece::blackRook } };
 			BoardRepresentation boardRepresentation1{ kingRookCheck };
 			BoardRepresentation boardRepresentation2{ kingRookCheck2 };
 			Assert::IsTrue(isPieceAttacked(boardRepresentation1, 2));
 			Assert::IsTrue(isPieceAttacked(boardRepresentation2, 2));
 
 			/* Bishop check the king*/
-			Piece blackBishop = Piece{ PieceType::bishop, false };
 			std::vector<std::pair<int, Piece>> kingBishopCheck{
-				{ 26, whiteKing } ,{ 8, blackBishop } };
+				{ 26, Piece::whiteKing } ,{ 8, Piece::blackBishop } };
 			std::vector<std::pair<int, Piece>> kingBishopCheck2{
-				{ 26, whiteKing } ,{ 5, blackBishop } };
+				{ 26, Piece::whiteKing } ,{ 5, Piece::blackBishop } };
 			BoardRepresentation boardRepresentation3{ kingBishopCheck };
 			BoardRepresentation boardRepresentation4{ kingBishopCheck };
 			Assert::IsTrue(isPieceAttacked(boardRepresentation3, 26));
 			Assert::IsTrue(isPieceAttacked(boardRepresentation4, 26));
 
 			/* Queen check the king*/
-			Piece blackQueen = Piece{ PieceType::queen, false };
 			std::vector<std::pair<int, Piece>> kingQueenCheck{
-				{ 7, whiteKing } ,{ 56, blackQueen } };
+				{ 7, Piece::whiteKing } ,{ 56, Piece::blackQueen } };
 			std::vector<std::pair<int, Piece>> kingQueenCheck2{
-				{ 7, whiteKing } ,{ 47, blackQueen } };
+				{ 7, Piece::whiteKing } ,{ 47, Piece::blackQueen } };
 			BoardRepresentation boardRepresentation5{ kingQueenCheck };
 			BoardRepresentation boardRepresentation6{ kingQueenCheck2 };
 			Assert::IsTrue(isPieceAttacked(boardRepresentation5, 7));
 			Assert::IsTrue(isPieceAttacked(boardRepresentation6, 7));
 
 			/* Knight check the king*/
-			Piece blacKnight = Piece{ PieceType::knight, false };
 			std::vector<std::pair<int, Piece>> kingKnightCheck{
-				{ 4, whiteKing } ,{ 21, blacKnight } };
+				{ 4, Piece::whiteKing } ,{ 21, Piece::blackKnight } };
 			std::vector<std::pair<int, Piece>> kingKnightCheck2{
-				{ 4, whiteKing } ,{ 10, blacKnight } };
+				{ 4, Piece::whiteKing } ,{ 10, Piece::blackKnight } };
 			BoardRepresentation boardRepresentation7{ kingKnightCheck };
 			BoardRepresentation boardRepresentation8{ kingKnightCheck2 };
 			Assert::IsTrue(isPieceAttacked(boardRepresentation7, 4));
 			Assert::IsTrue(isPieceAttacked(boardRepresentation8, 4));
 
 			/* Pawn Check the king*/
-			Piece blackPawn = Piece{ PieceType::pawn, false };
 			std::vector<std::pair<int, Piece>> kingPawnCheck{
-				{ 4, whiteKing } ,{ 11, blackPawn } };
+				{ 4, Piece::whiteKing } ,{ 11, Piece::blackPawn } };
 			std::vector<std::pair<int, Piece>> kingPawnCheck2{
-				{ 4, whiteKing } ,{ 13, blackPawn } };
+				{ 4, Piece::whiteKing } ,{ 13, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation9{ kingPawnCheck };
 			BoardRepresentation boardRepresentation10{ kingPawnCheck2 };
 			Assert::IsTrue(isPieceAttacked(boardRepresentation9, 4));
@@ -134,8 +127,8 @@ namespace UnitTests
 
 			/*Test king should not be check*/
 			std::vector<std::pair<int, Piece>> kingNotCheck{
-				{ 50, whiteKing } ,{ 35, blackQueen },{ 51, blackPawn },
-				{ 53, blackRook },{ 40, blackBishop },{ 58, blacKnight } };
+				{ 50, Piece::whiteKing } ,{ 35, Piece::blackQueen },{ 51, Piece::blackPawn },
+				{ 53, Piece::blackRook },{ 40, Piece::blackBishop },{ 58, Piece::blackKnight } };
 			BoardRepresentation boardRepresentation11{ kingNotCheck };
 			BoardRepresentation boardWithBeginningPos;
 			Assert::IsTrue(isPieceAttacked(boardRepresentation11, 50) == false);
@@ -147,19 +140,14 @@ namespace UnitTests
 		TEST_METHOD(TestAbsolutePin)
 		{
 			/* Test with Pawn pinned by a rook*/
-			Piece whiteKing = Piece{ PieceType::king, true };
-			Piece whitePawn = Piece{ PieceType::pawn, false };
-			Piece blackRook = Piece{ PieceType::rook, false };
 			std::vector<std::pair<int, Piece>> pawnPinned{
-				{ 12, whiteKing } ,{ 11, whitePawn }, {8, blackRook } };
+				{ 12, Piece::whiteKing } ,{ 11, Piece::whitePawn }, {8, Piece::blackRook } };
 			BoardRepresentation boardRepresentation{ pawnPinned };
 			Assert::IsTrue(isPieceInAbsolutePin(boardRepresentation,11,12));
 
 			/* Test with knight pinned by a bishop*/
-			Piece whiteKnight = Piece{ PieceType::knight, false };
-			Piece blackBishop = Piece{ PieceType::bishop, false };
 			std::vector<std::pair<int, Piece>> knightPinned{
-				{ 4, whiteKing } ,{ 11, whiteKnight },{ 32, blackBishop } };
+				{ 4, Piece::whiteKing } ,{ 11, Piece::whiteKnight },{ 32, Piece::blackBishop } };
 			BoardRepresentation boardRepresentation2{ knightPinned };
 			Assert::IsTrue(isPieceInAbsolutePin(boardRepresentation2, 11, 4));
 		}
@@ -168,43 +156,43 @@ namespace UnitTests
 		{
 			/* White King side Castling*/
 			BoardRepresentation kingSideCastling{};
-			kingSideCastling.board[5].type = PieceType::none;
-			kingSideCastling.board[6].type = PieceType::none;
-			auto possiblePins = generateCastlingMoves(kingSideCastling, 4);
-			Assert::AreEqual((int)possiblePins.size(), 1);
-			Assert::AreEqual(possiblePins[0].from, 4);
-			Assert::AreEqual(possiblePins[0].to, 6);
+			kingSideCastling.board[5] = Piece::none;
+			kingSideCastling.board[6] = Piece::none;
+			auto possibleCastlings = generateCastlingMoves(kingSideCastling, 4);
+			Assert::AreEqual((int)possibleCastlings.size(), 1);
+			Assert::AreEqual(possibleCastlings[0].from, 4);
+			Assert::AreEqual(possibleCastlings[0].to, 6);
 
 			/* White Queen side Castling*/
 			BoardRepresentation queenSideCastling{};
-			queenSideCastling.board[1].type = PieceType::none;
-			queenSideCastling.board[2].type = PieceType::none;
-			queenSideCastling.board[3].type = PieceType::none;
-			possiblePins = generateCastlingMoves(queenSideCastling, 4);
-			Assert::AreEqual((int)possiblePins.size(), 1);
-			Assert::AreEqual(possiblePins[0].from, 4);
-			Assert::AreEqual(possiblePins[0].to, 2);
+			queenSideCastling.board[1] = Piece::none;
+			queenSideCastling.board[2] = Piece::none;
+			queenSideCastling.board[3] = Piece::none;
+			possibleCastlings = generateCastlingMoves(queenSideCastling, 4);
+			Assert::AreEqual((int)possibleCastlings.size(), 1);
+			Assert::AreEqual(possibleCastlings[0].from, 4);
+			Assert::AreEqual(possibleCastlings[0].to, 2);
 
 			/* Black King side Castling*/
 			BoardRepresentation blackKingSideCastling{};
-			blackKingSideCastling.board[61].type = PieceType::none;
-			blackKingSideCastling.board[62].type = PieceType::none;
+			blackKingSideCastling.board[61] = Piece::none;
+			blackKingSideCastling.board[62] = Piece::none;
 			blackKingSideCastling.isWhiteTurn = false;
-			possiblePins = generateCastlingMoves(blackKingSideCastling, 60);
-			Assert::AreEqual((int)possiblePins.size(), 1);
-			Assert::AreEqual(possiblePins[0].from, 60);
-			Assert::AreEqual(possiblePins[0].to, 62);
+			possibleCastlings = generateCastlingMoves(blackKingSideCastling, 60);
+			Assert::AreEqual((int)possibleCastlings.size(), 1);
+			Assert::AreEqual(possibleCastlings[0].from, 60);
+			Assert::AreEqual(possibleCastlings[0].to, 62);
 
 			/* Black Queen side Castling*/
 			BoardRepresentation blackQueenSideCastling{};
-			blackQueenSideCastling.board[59].type = PieceType::none;
-			blackQueenSideCastling.board[58].type = PieceType::none;
-			blackQueenSideCastling.board[57].type = PieceType::none;
+			blackQueenSideCastling.board[59] = Piece::none;
+			blackQueenSideCastling.board[58] = Piece::none;
+			blackQueenSideCastling.board[57] = Piece::none;
 			blackQueenSideCastling.isWhiteTurn = false;
-			possiblePins = generateCastlingMoves(blackQueenSideCastling, 60);
-			Assert::AreEqual((int)possiblePins.size(), 1);
-			Assert::AreEqual(possiblePins[0].from, 60);
-			Assert::AreEqual(possiblePins[0].to, 58);
+			possibleCastlings = generateCastlingMoves(blackQueenSideCastling, 60);
+			Assert::AreEqual((int)possibleCastlings.size(), 1);
+			Assert::AreEqual(possibleCastlings[0].from, 60);
+			Assert::AreEqual(possibleCastlings[0].to, 58);
 			
 			//Test if No Castle possible
 			BoardRepresentation initialBoard{};
@@ -212,17 +200,17 @@ namespace UnitTests
 
 			/* White King can castle both ways*/
 			BoardRepresentation bothCastlingPossible{};
-			bothCastlingPossible.board[1].type = PieceType::none;
-			bothCastlingPossible.board[2].type = PieceType::none;
-			bothCastlingPossible.board[3].type = PieceType::none;
-			bothCastlingPossible.board[5].type = PieceType::none;
-			bothCastlingPossible.board[6].type = PieceType::none;
-			possiblePins = generateCastlingMoves(bothCastlingPossible, 4);
-			Assert::AreEqual((int)possiblePins.size(), 2);
-			Assert::AreEqual(possiblePins[0].from, 4);
-			Assert::AreEqual(possiblePins[0].to, 6);
-			Assert::AreEqual(possiblePins[1].from, 4);
-			Assert::AreEqual(possiblePins[1].to, 2);
+			bothCastlingPossible.board[1] = Piece::none;
+			bothCastlingPossible.board[2] = Piece::none;
+			bothCastlingPossible.board[3] = Piece::none;
+			bothCastlingPossible.board[5] = Piece::none;
+			bothCastlingPossible.board[6] = Piece::none;
+			possibleCastlings = generateCastlingMoves(bothCastlingPossible, 4);
+			Assert::AreEqual((int)possibleCastlings.size(), 2);
+			Assert::AreEqual(possibleCastlings[0].from, 4);
+			Assert::AreEqual(possibleCastlings[0].to, 6);
+			Assert::AreEqual(possibleCastlings[1].from, 4);
+			Assert::AreEqual(possibleCastlings[1].to, 2);
 		}
 
 		TEST_METHOD(PawnMoves)
@@ -252,10 +240,8 @@ namespace UnitTests
 			Assert::AreEqual(pawnMoves[1].to, 39);
 
 			/* Test pawns that has already move can only move of one case*/
-			auto whitePawn = Piece{ PieceType::pawn, true };
-			auto blackPawn = Piece{ PieceType::pawn, false };
 			std::vector<std::pair<int, Piece>> pawnsDisposition{
-				{ 16, whitePawn } ,{ 27, whitePawn },{ 46, blackPawn } };
+				{ 16, Piece::whitePawn } ,{ 27, Piece::whitePawn },{ 46, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation1{ pawnsDisposition };
 			pawnMoves = generatePawnMoves(boardRepresentation1, 16);
 			Assert::AreEqual(1, (int)pawnMoves.size());
@@ -283,24 +269,24 @@ namespace UnitTests
 
 			/* Test pawn promotion*/
 			std::vector<std::pair<int, Piece>> pawnsPromotionDisposition{
-				{ 53, whitePawn } ,{ 9, blackPawn } };
+				{ 53, Piece::whitePawn } ,{ 9, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation2{ pawnsDisposition };
-			Move promotion = generatePawnMoves(boardRepresentation2, 53, PieceType::queen)[0];
-			Assert::IsTrue(promotion.to == 61 && promotion.promotion == PieceType::queen);
+			Move promotion = generatePawnMoves(boardRepresentation2, 53, Piece::whiteQueen)[0];
+			Assert::IsTrue(promotion.to == 61 && promotion.promotion == Piece::whiteQueen);
 			boardRepresentation2.isWhiteTurn = false; //Black turn
-			promotion = generatePawnMoves(boardRepresentation2, 9, PieceType::knight)[0];
-			Assert::IsTrue(promotion.to == 1 && promotion.promotion == PieceType::knight);
+			promotion = generatePawnMoves(boardRepresentation2, 9, Piece::blackKnight)[0];
+			Assert::IsTrue(promotion.to == 1 && promotion.promotion == Piece::blackKnight);
 
 			/*Test Pawn Capture*/
 			std::vector<std::pair<int, Piece>> pawnsAttack{
-				{ 9, whitePawn } ,{ 16, blackPawn },{ 18, blackPawn } };
+				{ 9, Piece::whitePawn } ,{ 16, Piece::blackPawn },{ 18, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation3{ pawnsAttack };
 			Assert::AreEqual(4, (int)generatePawnMoves(boardRepresentation3, 9).size());
 			boardRepresentation3.isWhiteTurn = false;
 			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 16).size());
 			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 18).size());
 			std::vector<std::pair<int, Piece>> pawnsAttack2{
-				{ 43, blackPawn } ,{ 34, whitePawn },{ 36, whitePawn } };
+				{ 43, Piece::blackPawn } ,{ 34, Piece::whitePawn },{ 36, Piece::whitePawn } };
 			BoardRepresentation boardRepresentation4{ pawnsAttack2 };
 			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 34).size());
 			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 36).size());
@@ -352,20 +338,16 @@ namespace UnitTests
 
 		TEST_METHOD(KingCheckMate)
 		{
-			auto blackRook = Piece{ PieceType::rook, false };
-			auto whiteKing = Piece{ PieceType::king, true };
 			std::vector<std::pair<int, Piece>> kingCheckMated{
-				{ 4, whiteKing } ,{ 8, blackRook },{ 7, blackRook } };
+				{ 4, Piece::whiteKing } ,{ 8, Piece::blackRook },{ 7, Piece::blackRook } };
 			BoardRepresentation boardRepresentation{ kingCheckMated };
 			Assert::IsTrue(isKingCheckmate(boardRepresentation, 4));
 		}
 
 		TEST_METHOD(KingStealMate)
 		{
-			auto blackRook = Piece{ PieceType::rook, false };
-			auto whiteKing = Piece{ PieceType::king, true };
 			std::vector<std::pair<int, Piece>> kingCheckMated{
-				{ 4, whiteKing } ,{ 8, blackRook },{ 59, blackRook },{ 61, blackRook } };
+				{ 4, Piece::whiteKing } ,{ 8, Piece::blackRook },{ 59, Piece::blackRook },{ 61, Piece::blackRook } };
 			BoardRepresentation boardRepresentation{ kingCheckMated };
 			Assert::IsTrue(isKingStealMate(boardRepresentation, 4));
 		}

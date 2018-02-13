@@ -114,6 +114,7 @@
     <ClCompile Include="BoardRepresentation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MoveGeneration.cpp" />
+    <ClCompile Include="Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />

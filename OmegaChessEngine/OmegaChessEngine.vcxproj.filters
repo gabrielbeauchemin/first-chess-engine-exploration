@@ -33,6 +33,9 @@
     <ClCompile Include="MoveGeneration.cpp">
       <Filter>Source Files\BoardRepresentation</Filter>
     </ClCompile>
+    <ClCompile Include="Piece.cpp">
+      <Filter>Source Files\BoardRepresentation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h">

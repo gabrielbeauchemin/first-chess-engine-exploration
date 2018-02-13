@@ -4,6 +4,7 @@
 #include "../OmegaChessEngine/BoardRepresentation.cpp"
 #include "../OmegaChessEngine/MoveGeneration.hpp"
 #include "../OmegaChessEngine/MoveGeneration.cpp"
+#include "../OmegaChessEngine/Piece.h"
 #include "string"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -71,17 +72,17 @@ namespace UnitTests
 			int nbrRook=0, nbrBishop=0, nbrKnight=0, nbrKing=0, nbrQueen=0, nbrPawn=0, nbrEmptyCase=0;
 			for (auto& e: board.board)
 			{
-				if (e.type == PieceType::bishop)
+				if (isPieceBishop(e))
 					++nbrBishop;
-				else if (e.type == PieceType::knight)
+				else if (isPieceKnight(e))
 					++nbrKnight;
-				else if (e.type == PieceType::king)
+				else if (isPieceKing(e))
 					++nbrKing;
-				else if (e.type == PieceType::queen)
+				else if (isPieceQueen(e))
 					++nbrQueen;
-				else if (e.type == PieceType::pawn)
+				else if (isPiecePawn(e))
 					++nbrPawn;
-				else if (e.type == PieceType::rook)
+				else if (isPieceRook(e))
 					++nbrRook;
 				else
 					++nbrEmptyCase;
@@ -101,7 +102,7 @@ namespace UnitTests
 			//Random game that includes all kind of moves to test the board representation
 		    //It includes a kings side castle, an en passant, a promotion, a checkmate
 			//And moves from the bishop, the knights, the rook, the queen and the pawn
-			Move gameMoves[] = { Move{12,20}, Move{49,33}, Move{6,21}, Move{33,25}, Move{10,26}, Move{25,18}, Move{11,27}, Move{18,9}, Move{5,26}, Move{9,2,PieceType::queen}, Move{3,2}, Move{57,40}, Move{4,6}, Move{50,34}, Move{2,10}, Move{58,49}, Move{10,37}, Move{56, 58}, Move{1,18}, Move{58,42}, Move{37,53} };
+			Move gameMoves[] = { Move{12,20}, Move{49,33}, Move{6,21}, Move{33,25}, Move{10,26}, Move{25,18}, Move{11,27}, Move{18,9}, Move{5,26}, Move{9,2,Piece::blackQueen}, Move{3,2}, Move{57,40}, Move{4,6}, Move{50,34}, Move{2,10}, Move{58,49}, Move{10,37}, Move{56, 58}, Move{1,18}, Move{58,42}, Move{37,53} };
 							
 			//Play the game and check after each move if eveyrthing is ok
 			BoardRepresentation boardRepresentation;
@@ -128,8 +129,8 @@ namespace UnitTests
 					//Promotion move (9,2)
 					else if (move.from == 9 && move.to == 2)
 					{
-						Assert::IsTrue(boardRepresentation.board[2].type == PieceType::queen);
-						Assert::IsTrue(boardRepresentation.board[2].isWhite == false);
+						Assert::IsTrue(isPieceQueen(boardRepresentation.board[2]));
+						Assert::IsTrue(!isPieceWhite(boardRepresentation.board[2]));
 					}
 					//King Castle (4,6)
 					else if (move.from == 4 && move.to == 6)

@@ -13,7 +13,7 @@ struct Move
 public:
 	int from;
 	int to;
-	PieceType promotion;
+	Piece promotion;
 
 	Move() = delete;
 
@@ -30,7 +30,7 @@ public:
 	   0  1  2  3  4  5  6  7 
 	*/ 
 
-	Move(int from, int to, PieceType promotion = PieceType::none)
+	Move(int from, int to, Piece promotion = Piece::none)
 		: from{from}, to{to}, promotion{promotion}
 	{
 		auto isOutBound = [](int chessCase) { return (chessCase > 63 || chessCase < 0); };

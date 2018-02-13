@@ -38,7 +38,7 @@ namespace MoveGeneration
 	static const std::vector<int> queenOffset = { -11, -10, -9, -1, 1,  9, 10, 11 };
 	static const std::vector<int> kingOffset = { -11, -10, -9, -1, 1,  9, 10, 11 };
 
-	std::vector<Move> generateMoves(const BoardRepresentation& boardRepresentation)
+	std::vector<Move> generateMoves(BoardRepresentation& boardRepresentation)
 	{
 		//Find king index
 		int kingIndex;
@@ -527,12 +527,15 @@ namespace MoveGeneration
 
 	}
 
-	bool isPieceInAbsolutePin(BoardRepresentation boardRepresentation, int pieceCase, int kingCase)
+	bool isPieceInAbsolutePin(BoardRepresentation& boardRepresentation, int pieceCase, int kingCase)
 	{
 		//If the piece is in absolute pin, that means that if
 		//It is gone, the king is cheked
+		Piece tmp = boardRepresentation.board[pieceCase];
 		boardRepresentation.board[pieceCase] = Piece::none;
-		return isPieceAttacked(boardRepresentation, kingCase);
+		bool isPieceBasolutePin = isPieceAttacked(boardRepresentation, kingCase);
+		boardRepresentation.board[pieceCase] = tmp;
+		return isPieceBasolutePin;
 	}
 
 	bool isPawnMovePromotion(const BoardRepresentation& boardRepresentation, int pawnCaseBeforeMove)
@@ -547,26 +550,26 @@ namespace MoveGeneration
 		}
 	}
 
-	void filterMovesUncheckingKing(const BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase)
+	void filterMovesUncheckingKing(BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase)
 	{
 		std::remove_if(movesToFilter.begin(), movesToFilter.end(), 
 			[&](const Move & move)
 		{
-			//TO DO: Replace the copy of the board representation by unmake move once its done
-			BoardRepresentation copyBoardRep = boardRepresentation;
-		    copyBoardRep.move(move);
-			return isPieceAttacked(copyBoardRep, kingCase);
+			boardRepresentation.move(move);
+			bool isKingInCheck = isPieceAttacked(boardRepresentation, kingCase);
+			boardRepresentation.unmakeMove(move);
+			return isKingInCheck;
 		});
 		
 	}
 
-	bool isKingCheckmate(const BoardRepresentation & boardRepresentation, int kingCase)
+	bool isKingCheckmate(BoardRepresentation & boardRepresentation, int kingCase)
 	{
 		return isPieceAttacked(boardRepresentation, kingCase) &&
 			   generateMoves(boardRepresentation).size() == 0;
 	}
 
-	bool isKingStealMate(const BoardRepresentation & boardRepresentation, int kingCase)
+	bool isKingStealMate(BoardRepresentation & boardRepresentation, int kingCase)
 	{
 		return generateMoves(boardRepresentation).size() == 0 &&
 			  !isPieceAttacked(boardRepresentation, kingCase);

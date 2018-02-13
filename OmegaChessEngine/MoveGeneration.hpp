@@ -5,7 +5,7 @@ class BoardRepresentation;
 
 namespace MoveGeneration
 {
-	std::vector<Move> generateMoves(const BoardRepresentation& boardRepresentation);
+	std::vector<Move> generateMoves(BoardRepresentation& boardRepresentation);
 	std::vector<Move> generateRookMoves(const BoardRepresentation& boardRepresentation, int rookCase);
 	std::vector<Move> generateKnightMoves(const BoardRepresentation& boardRepresentation, int knightCase);
 	std::vector<Move> generateBishopMoves(const BoardRepresentation& boardRepresentation, int bishopCase);
@@ -16,10 +16,10 @@ namespace MoveGeneration
 	std::vector<Move> generatePawnMoves(const BoardRepresentation& boardRepresentation, int pawnCase, Piece promotion);
 
 	bool isPieceAttacked(const BoardRepresentation& boardRepresentation, int pieceCase);
-	bool isPieceInAbsolutePin(BoardRepresentation boardRepresentation, int pieceCase, int kingCase);
+	bool isPieceInAbsolutePin(BoardRepresentation& boardRepresentation, int pieceCase, int kingCase);
 	bool isPawnMovePromotion(const BoardRepresentation& boardRepresentation, int pawnCase);
-	void filterMovesUncheckingKing(const BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase);
-	bool isKingCheckmate(const BoardRepresentation& boardRepresentation, int kingCase);
-	bool isKingStealMate(const BoardRepresentation& boardRepresentation, int kingCase);
+	void filterMovesUncheckingKing(BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase);
+	bool isKingCheckmate(BoardRepresentation& boardRepresentation, int kingCase);
+	bool isKingStealMate(BoardRepresentation& boardRepresentation, int kingCase);
 
 };

@@ -177,6 +177,49 @@ namespace UnitTests
 			auto t = boardRepresentation.toString();
 			Assert::AreEqual(boardRepresentation.toString(), validEndGame);
 		}
+
+		TEST_METHOD(MoveKingCastling)
+		{
+			/* White King side Castling*/
+			BoardRepresentation kingSideCastling{};
+			kingSideCastling.board[5] = Piece::none;
+			kingSideCastling.board[6] = Piece::none;
+			kingSideCastling.move(Move{ 4,6 });
+			Assert::IsTrue(isPieceNone(kingSideCastling.board[4]));
+			Assert::IsTrue(isPieceKing(kingSideCastling.board[6]));
+			Assert::IsTrue(isPieceRook(kingSideCastling.board[5]));
+
+			/* White Queen side Castling*/
+			BoardRepresentation queenSideCastling{};
+			queenSideCastling.board[1] = Piece::none;
+			queenSideCastling.board[2] = Piece::none;
+			queenSideCastling.board[3] = Piece::none;
+			queenSideCastling.move(Move{ 4,2 });
+			Assert::IsTrue(isPieceNone(queenSideCastling.board[4]));
+			Assert::IsTrue(isPieceKing(queenSideCastling.board[2]));
+			Assert::IsTrue(isPieceRook(queenSideCastling.board[3]));
+
+			/* Black King side Castling*/
+			BoardRepresentation blackKingSideCastling{};
+			blackKingSideCastling.board[61] = Piece::none;
+			blackKingSideCastling.board[62] = Piece::none;
+			blackKingSideCastling.isWhiteTurn = false;
+			blackKingSideCastling.move(Move{ 60,62 });
+			Assert::IsTrue(isPieceNone(blackKingSideCastling.board[60]));
+			Assert::IsTrue(isPieceKing(blackKingSideCastling.board[62]));
+			Assert::IsTrue(isPieceRook(blackKingSideCastling.board[61]));
+
+			/* Black Queen side Castling*/
+			BoardRepresentation blackQueenSideCastling{};
+			blackQueenSideCastling.board[59] = Piece::none;
+			blackQueenSideCastling.board[58] = Piece::none;
+			blackQueenSideCastling.board[57] = Piece::none;
+			blackQueenSideCastling.isWhiteTurn = false;
+			blackQueenSideCastling.move(Move{ 60,58 });
+			Assert::IsTrue(isPieceNone(blackQueenSideCastling.board[60]));
+			Assert::IsTrue(isPieceKing(blackQueenSideCastling.board[58]));
+			Assert::IsTrue(isPieceRook(blackQueenSideCastling.board[59]));
+		}
 	};
 
 	

@@ -375,9 +375,9 @@ namespace UnitTests
 				
 				std::vector<Move> moves = generateMoves(boardRepresentation);
 				for (auto& currentMove : moves) {
-					BoardRepresentation boardRepAfterMove = boardRepresentation;
-					boardRepAfterMove.move(currentMove);
-					nbrNodes += perft(depth - 1, boardRepAfterMove);
+					boardRepresentation.move(currentMove);
+					nbrNodes += perft(depth - 1, boardRepresentation);
+					boardRepresentation.unmakeMove(currentMove);
 				}
 
 				return nbrNodes;

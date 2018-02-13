@@ -1,5 +1,6 @@
 #include "BoardRepresentation.h"
 #include "IlegalMoveException.h"
+#include <assert.h>
 
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
@@ -40,12 +41,13 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::move(Move move)
 {  
-	//Help for debugs, comment for release mode
-	if ( isPieceWhite(this->board[move.from]) != this->isWhiteTurn ||
-		isPieceNone(this->board[move.from]) )
-	{
-		throw IlegalMoveException{};
-	}
+	/*Update back helpers of unmakeMove*/
+	this->lastCapture = Piece::none;
+	this->justLooseRightCastle = false; 
+	
+	//Help to debug
+	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
+	assert(!isPieceNone(this->board[move.from]));
 
 	if (isMoveCastling(move)) //Case Castling:
 	{
@@ -63,39 +65,48 @@ void BoardRepresentation::move(Move move)
 			this->canWhiteCastle = false;
 		else
 			this->canBlackCastle = false;
-
-		isWhiteTurn = !this->isWhiteTurn;
-		++this->reversibleMovesInRow;
 	}
 	else //Not Castling, normal move
 	{
-		//If king moves, he looses the right to castle
+		//King moves looses the right to castle
 		if (isPieceKing(board[move.from]))
 		{
-			if (isWhiteTurn)
+			if (isWhiteTurn && this->canWhiteCastle == true)
+			{
 				this->canWhiteCastle = false;
-			else
+				this->justLooseRightCastle = true; //Help for unmakeMove
+			}
+			else if (!isWhiteTurn && this->canBlackCastle == true)
+			{
 				this->canBlackCastle = false;
+				this->justLooseRightCastle = true; //Help for unmakeMove
+			}
 		}
 
 		//In case of Capture
 		if ( !isPieceNone(board[move.to]))
 		{
+			this->lastCapture = board[move.to]; //Help for unmakeMove
 			board[move.to] = Piece::none;
 		}
 
 		//Move the piece
 		swap<Piece>(board, move.from, move.to);
-		isWhiteTurn = !this->isWhiteTurn;
 
 		//Promotion
 		if (!isPieceNone(move.promotion))
 			board[move.to] = move.promotion;
 	}
 	
-	if (!isPiecePawn(board[move.from]))
+	isWhiteTurn = !this->isWhiteTurn;
+	if (!isPiecePawn(board[move.to]))
 	{
 		++this->reversibleMovesInRow;
+	}
+	else
+	{
+		this->lastReversibleMovesinRow = this->reversibleMovesInRow;
+		this->reversibleMovesInRow = 0;
 	}
 
 	//En passant is only good for one move
@@ -105,6 +116,65 @@ void BoardRepresentation::move(Move move)
 	{
 		this->isEnPensantPossible = std::pair<bool, int>(true, move.to);
 	};
+}
+
+void BoardRepresentation::unmakeMove(Move move)
+{
+	//Help to debug
+	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
+	assert(isPieceNone(this->board[move.from]));
+	
+
+	if (isMoveCastling(move)) //Case Castling:
+	{
+		swap<Piece>(board, move.to, move.from); //Swap King
+		bool isKingSideCastling = (move.from - move.to < 0) ? true : false;
+		int initialRookPos;
+		if (this->isWhiteTurn && isKingSideCastling) initialRookPos = 7;
+		else if (this->isWhiteTurn && !isKingSideCastling) initialRookPos = 0;
+		else if (!this->isWhiteTurn && isKingSideCastling) initialRookPos = 63;
+		else if (!this->isWhiteTurn && !isKingSideCastling) initialRookPos = 56;
+		int translationRook = (isKingSideCastling) ? -2 : 3;
+		swap<Piece>(board, initialRookPos + translationRook, initialRookPos); //Swap Rook
+
+		if (isWhiteTurn)
+			this->canBlackCastle = true;
+		else
+			this->canWhiteCastle = true;
+	}
+	else //Not Castling, normal move
+	{
+		//King moves looses the right to castle
+		if (isPieceKing(board[move.from]) && this->justLooseRightCastle == true)
+		{
+			if (isWhiteTurn)
+				this->canBlackCastle = true;
+			else
+				this->canWhiteCastle = true;
+			this->justLooseRightCastle == false;
+		}
+
+		//Move the piece
+		swap<Piece>(board, move.to, move.from);
+
+		//In case that a piece got Captured the move before
+		if (!isPieceNone(lastCapture))
+		{
+			assert(this->isWhiteTurn == isPieceWhite(lastCapture));
+			board[move.to] = lastCapture;
+			this->lastCapture = Piece::none;
+		}
+	}
+
+	isWhiteTurn = !this->isWhiteTurn;
+	if (!isPiecePawn(board[move.from]))
+	{
+		--this->reversibleMovesInRow;
+	}
+	else this->reversibleMovesInRow = lastReversibleMovesinRow;
+
+	//Unmaking the move can only remove the possibility of an En passant, not create one
+	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 }
 
 std::string BoardRepresentation::toString()

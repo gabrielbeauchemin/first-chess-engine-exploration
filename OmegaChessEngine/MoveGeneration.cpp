@@ -75,7 +75,8 @@ namespace MoveGeneration
 			else
 			{
 				//Do not move pieces that are in absolute pin
-				if (isPieceInAbsolutePin(boardRepresentation, caseIndex, kingIndex))
+				if (!isPieceKing(currentPiece) &&
+					isPieceInAbsolutePin(boardRepresentation, caseIndex, kingIndex))
 				{
 					continue;
 				}
@@ -243,7 +244,7 @@ namespace MoveGeneration
 	}
 
 	//Do not include the castling move to be more modular
-	std::vector<Move> generateKingMoves(const BoardRepresentation& boardRepresentation, int kingCase)
+	std::vector<Move> generateKingMoves(BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		std::vector<Move> moves;
 
@@ -273,8 +274,12 @@ namespace MoveGeneration
 			else //The case is empty
 			{
 				//The king should not be in check at this new case
+				//Remove temporarly the king to evaluate if the case is attacked
+				Piece tmpKing = boardRepresentation.board[kingCase]; 
+				boardRepresentation.board[kingCase] = Piece::none;
 				if (!isPieceAttacked(boardRepresentation, currentCaseIndex))
 				   moves.push_back(Move{ kingCase,currentCaseIndex });
+				boardRepresentation.board[kingCase] = tmpKing;
 			}
 			
 		}
@@ -283,7 +288,7 @@ namespace MoveGeneration
 	}
 
 	//Do not check if king is in check, it is checked in generateMoves
-	std::vector<Move> generateCastlingMoves(const BoardRepresentation& boardRepresentation, int kingCase)
+	std::vector<Move> generateCastlingMoves(BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		std::vector<Move> possibleCastlings;
 		std::vector<Move> castlingMoves = (boardRepresentation.isWhiteTurn)
@@ -426,8 +431,13 @@ namespace MoveGeneration
 		return std::vector<Move>{ Move{ pawnCase,pawnCase + step, promotion }};
 	}
 
-	bool isPieceAttacked(const BoardRepresentation& boardRepresentation, int pieceCase)
+	bool isPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase)
 	{
+		//Remove the piece for the evaluation, as it can block potential attack
+		//Put it back at the end
+		Piece piecePotentiallyAttacked = boardRepresentation.board[pieceCase];
+		boardRepresentation.board[pieceCase] = Piece::none;
+
 		//Each iteration, move the piece in diagonal
 		//If he meets bishop or queen or pawn from the opposite camp, hes in check
 		for (const int& currentOffset : bishopOffset /*Diagonal Moves*/)
@@ -449,12 +459,15 @@ namespace MoveGeneration
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
 						&& isPiecePawn(currentCase) && firstOffset)
 					{
+						//boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 						return true;
+
 					}
 					//piece meets a bishop or queen from opposite camp, hes in check
 					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn &&
 						     (isPieceQueen(currentCase) || isPieceBishop(currentCase)) )
 					{
+						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 						return true;
 					}
 					//He meets a piece of its own camp or a piece from the opposite camp
@@ -490,6 +503,7 @@ namespace MoveGeneration
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
 						&& (isPieceQueen(currentCase) || isPieceRook(currentCase)))
 					{
+						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 						return true;
 					}
 					//He meets a piece of its own camp or a piece from the opposite camp
@@ -518,11 +532,13 @@ namespace MoveGeneration
 			if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
 				&& isPieceKnight(currentCase))
 			{
+				boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 				return true;
 			}
 		}
 
 		//piece didnt find any pieces of the opposite camp that are attacking him
+		boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 		return false;
 
 	}

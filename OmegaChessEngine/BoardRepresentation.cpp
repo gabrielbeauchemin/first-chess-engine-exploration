@@ -37,15 +37,21 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 		this->board[pieceToPlace.first] = pieceToPlace.second;
 }
 
+bool BoardRepresentation::operator==(const BoardRepresentation & other)
+{
+	for (int i = 0; i < 64; ++i)
+	{
+		if (this->board[i] != other.board[i])
+			return false;
+	}
+
+	return true;
+}
+
 //Only move the piece requested without checking for the
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::move(Move move)
 {  
-	/*Update back helpers of unmakeMove*/
-	this->lastCapture = Piece::none;
-	this->justLooseRightCastle = false; 
-	
-	//Help to debug
 	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
 	assert(!isPieceNone(this->board[move.from]));
 
@@ -86,7 +92,7 @@ void BoardRepresentation::move(Move move)
 		//In case of Capture
 		if ( !isPieceNone(board[move.to]))
 		{
-			this->lastCapture = board[move.to]; //Help for unmakeMove
+			this->lastCaptures[nbrMovesDone] = board[move.to]; //Help for unmakeMove
 			board[move.to] = Piece::none;
 		}
 
@@ -116,11 +122,12 @@ void BoardRepresentation::move(Move move)
 	{
 		this->isEnPensantPossible = std::pair<bool, int>(true, move.to);
 	};
+
+	++nbrMovesDone;
 }
 
 void BoardRepresentation::unmakeMove(Move move)
 {
-	//Help to debug
 	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
 	assert(isPieceNone(this->board[move.from]));
 	
@@ -158,11 +165,12 @@ void BoardRepresentation::unmakeMove(Move move)
 		swap<Piece>(board, move.to, move.from);
 
 		//In case that a piece got Captured the move before
-		if (!isPieceNone(lastCapture))
+		auto lastCapture = this->lastCaptures.find(nbrMovesDone - 1);
+		if (lastCaptures.end() != lastCapture)
 		{
-			assert(this->isWhiteTurn == isPieceWhite(lastCapture));
-			board[move.to] = lastCapture;
-			this->lastCapture = Piece::none;
+			assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
+			board[move.to] = lastCapture->second;
+			this->lastCaptures.erase(lastCapture);
 		}
 	}
 
@@ -175,6 +183,8 @@ void BoardRepresentation::unmakeMove(Move move)
 
 	//Unmaking the move can only remove the possibility of an En passant, not create one
 	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
+
+	--nbrMovesDone;
 }
 
 std::string BoardRepresentation::toString()

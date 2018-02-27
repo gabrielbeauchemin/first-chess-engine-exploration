@@ -12,7 +12,6 @@
 class Evaluation
 {
 private:
-	static const int infinity;
 
 	static const int pawnValue;
 	static const int bishopValue;
@@ -41,6 +40,7 @@ private:
 	static bool isEndGame(BoardRepresentation& boardRepresentation, std::vector<Piece>& pieces);
 
 public :
+	static const int biggestEvaluation;
 	static const int evaluate(BoardRepresentation& boardRepresentation);
 
 };

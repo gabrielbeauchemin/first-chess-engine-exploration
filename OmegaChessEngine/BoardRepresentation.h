@@ -6,6 +6,7 @@
 #include "Move.h"
 #include <String>
 #include "MoveGeneration.hpp"
+#include <map>
 
 class BoardRepresentation
 {
@@ -18,6 +19,7 @@ public:
 	//Use unmakeMove method instead
 	BoardRepresentation & operator= (const BoardRepresentation) = delete;
 	BoardRepresentation(const BoardRepresentation&) = delete;
+	bool operator==(const BoardRepresentation& other);
 
 	Piece board[64];
 	bool isWhiteTurn;
@@ -32,10 +34,11 @@ public:
 
 private: 
 	/*Help for unmakeMove*/
-	Piece lastCapture = Piece::none; 
+	std::map<int,Piece> lastCaptures;
 	bool justLooseRightCastle = false;
 	int lastReversibleMovesinRow;
 
+	int nbrMovesDone = 0;
 	template<class T>
 	void swap(T array[], int i, int j);
 	bool isMoveCastling(Move move);

@@ -4,7 +4,7 @@
 
 using namespace MoveGeneration;
 
-const int Evaluation::infinity = std::numeric_limits<int>::max();
+const int Evaluation::biggestEvaluation = std::numeric_limits<int>::max();
 const int Evaluation::bishopValue = 330;
 const int Evaluation::knightValue = 320;
 const int Evaluation::pawnValue = 100;
@@ -193,9 +193,8 @@ const std::unordered_map<Piece, std::vector<int>> Evaluation::positionsValue =
 
 const int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 {
-	int colorFactor = (boardRepresentation.isWhiteTurn) ? 1 : -1;
-
-	int score = 0, kingIndex;
+	int score = 0;
+	std::vector<int> kingsIndex;
 	std::vector<Piece> pieces;
 	for (int caseIndex = 0; caseIndex < 64; ++caseIndex)
 	{
@@ -205,48 +204,54 @@ const int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 
 		//Special Process for king because it has a matrice for the
 		//Middle game an one for the end game
-		if (isPieceKing)
+		if (isPieceKing(currentCase))
 		{
 			//Calculate later once we have the list of pieces
 			//So its faster to calculate if its a an endgame or not
-			kingIndex = caseIndex;
+			kingsIndex.push_back(caseIndex);
 		}
 		else
 		{
-			score += piecesValue.find(currentCase)->second;
-			score += positionsValue.find(currentCase)->second[caseIndex];
+			int colorFactor = isPieceWhite(currentCase) ? 1 : -1;
+			score += colorFactor * piecesValue.find(currentCase)->second;
+			score += colorFactor * positionsValue.find(currentCase)->second[caseIndex];
 		}
 	}
 
-	if (isKingCheckmate(boardRepresentation, kingIndex))
+	int kingTurnIndex = isPieceWhite(boardRepresentation.board[kingsIndex[0]]) == boardRepresentation.isWhiteTurn
+		                ?kingsIndex[0] : kingsIndex[1];
+	if (isKingCheckmate(boardRepresentation, kingTurnIndex))
 	{
-		return colorFactor * infinity;
+		int colorFactor = (boardRepresentation.isWhiteTurn) ? 1 : -1;
+		return colorFactor * biggestEvaluation;
 	}
 
-	if (isKingStealMate(boardRepresentation, kingIndex) ||
+	if (isKingStealMate(boardRepresentation, kingTurnIndex) ||
 		boardRepresentation.reversibleMovesInRow >= 50)
 	{
 		return 0;
 	}
 
-	//Add king score
-	score += kingValue;
-	if (isEndGame(boardRepresentation, pieces))
+	//Add kings score
+	for (int& kingIndex : kingsIndex)
 	{
-		if (boardRepresentation.isWhiteTurn)
-			score += whiteKingEndGamePositionValue[kingIndex];
+		if (isEndGame(boardRepresentation, pieces))
+		{
+			if (isPieceWhite(boardRepresentation.board[kingIndex]))
+				score += whiteKingEndGamePositionValue[kingIndex];
+			else
+				score -= blackKingEndGamePositionValue[kingIndex];
+		}
 		else
-			score += blackKingEndGamePositionValue[kingIndex];
-	}
-	else
-	{
-		if (boardRepresentation.isWhiteTurn)
-			score += whiteKingMiddleGamePositionValue[kingIndex];
-		else
-			score += blackKingMiddleGamePositionValue[kingIndex];
+		{
+			if (isPieceWhite(boardRepresentation.board[kingIndex]))
+				score += whiteKingMiddleGamePositionValue[kingIndex];
+			else
+				score -= blackKingMiddleGamePositionValue[kingIndex];
+		}
 	}
 
-	return score * colorFactor;
+	return score;
 }
 
 //Can do better: as for now do like the article recommend:

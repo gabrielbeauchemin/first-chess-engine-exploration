@@ -1,6 +1,7 @@
 #include "MoveGeneration.hpp"
 #include "NotImplementedException.h"
 #include <algorithm>
+#include <assert.h>
 
 namespace MoveGeneration
 {
@@ -263,8 +264,11 @@ namespace MoveGeneration
 				if (isPieceWhite(boardRepresentation.board[currentCaseIndex]) != boardRepresentation.isWhiteTurn)
 				{
 					//The opposite piece should not be protected to be captured by the king
+					Piece tmpKing = boardRepresentation.board[kingCase];
+					boardRepresentation.board[kingCase] = Piece::none;
 					if(!isPieceAttacked(boardRepresentation, currentCaseIndex))
 					   moves.push_back(Move{ kingCase,currentCaseIndex }); 
+					boardRepresentation.board[kingCase] = tmpKing;
 				}
 
 				//its a capture or the piece got blocked by a piece of its camp, 
@@ -290,6 +294,10 @@ namespace MoveGeneration
 	//Do not check if king is in check, it is checked in generateMoves
 	std::vector<Move> generateCastlingMoves(BoardRepresentation& boardRepresentation, int kingCase)
 	{
+		//GenerateCastlingMoves should not be call if king hes in check.
+		//It should have be checked before, else it<s a waste of time to check it two times
+		assert(!isPieceAttacked(boardRepresentation, kingCase));
+
 		std::vector<Move> possibleCastlings;
 		std::vector<Move> castlingMoves = (boardRepresentation.isWhiteTurn)
 			                       ? std::vector<Move>{ Move{ 4,6 }, Move{ 4,2 }}

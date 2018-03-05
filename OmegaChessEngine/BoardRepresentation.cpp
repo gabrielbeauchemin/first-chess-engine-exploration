@@ -54,6 +54,12 @@ void BoardRepresentation::move(Move move)
 {  
 	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
 	assert(!isPieceNone(this->board[move.from]));
+	if (!isPieceNone(this->board[move.to]) &&
+		(isPieceWhite(this->board[move.to]) == this->isWhiteTurn))
+	{
+		std::string t = this->toString();
+		assert(false);
+	}
 
 	if (isMoveCastling(move)) //Case Castling:
 	{
@@ -128,9 +134,7 @@ void BoardRepresentation::move(Move move)
 
 void BoardRepresentation::unmakeMove(Move move)
 {
-	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
-	assert(isPieceNone(this->board[move.from]));
-	
+	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);	
 
 	if (isMoveCastling(move)) //Case Castling:
 	{
@@ -151,6 +155,8 @@ void BoardRepresentation::unmakeMove(Move move)
 	}
 	else //Not Castling, normal move
 	{
+		assert(isPieceNone(this->board[move.from]));
+
 		//King moves looses the right to castle
 		if (isPieceKing(board[move.from]) && this->justLooseRightCastle == true)
 		{
@@ -229,7 +235,7 @@ std::string BoardRepresentation::toString()
 
 bool BoardRepresentation::isMoveCastling(Move move)
 {
-	Move allCastlingMoves[]{ Move{4,6}, Move{ 4,2 }, Move{ 60,62 }, Move{ 60,58 } };
+	static Move allCastlingMoves[]{ Move{4,6}, Move{ 4,2 }, Move{ 60,62 }, Move{ 60,58 } };
 	for (auto& m : allCastlingMoves)
 		if (m == move)
 			return true;

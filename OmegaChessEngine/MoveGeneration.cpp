@@ -5,7 +5,7 @@
 
 namespace MoveGeneration
 {
-	int mailbox[120] = {
+	static int mailbox[120] = {
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1,  0,  1,  2,  3,  4,  5,  6,  7, -1,
@@ -75,11 +75,16 @@ namespace MoveGeneration
 			}
 			else
 			{
-				//Do not move pieces that are in absolute pin
+				//Pieces that are in absolute pin can move only if it doesnt check the king
+				//Take note of absolute pin to send it to generate moves functions
+				//The exceptions are the pawn and knights, which cant move in any direction without cheking its king
+				bool isPiecePinned = false;
 				if (!isPieceKing(currentPiece) &&
 					isPieceInAbsolutePin(boardRepresentation, caseIndex, kingIndex))
 				{
-					continue;
+					isPiecePinned = true;
+					if (isPieceKnight(currentPiece) || isPiecePawn(currentPiece))
+						continue;
 				}
 				else if (isPiecePawn(currentPiece))
 				{
@@ -103,7 +108,7 @@ namespace MoveGeneration
 				}
 				else if (isPieceBishop(currentPiece))
 				{
-					auto newMoves = generateBishopMoves(boardRepresentation, caseIndex);
+					auto newMoves = generateBishopMoves(boardRepresentation, caseIndex, isPiecePinned);
 					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
@@ -115,7 +120,7 @@ namespace MoveGeneration
 				}
 				else if (isPieceRook(currentPiece))
 				{
-					auto newMoves = generateRookMoves(boardRepresentation, caseIndex);
+					auto newMoves = generateRookMoves(boardRepresentation, caseIndex, isPiecePinned);
 					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
@@ -132,7 +137,7 @@ namespace MoveGeneration
 				}
 				else if (isPieceQueen(currentPiece))
 				{
-					auto newMoves = generateQueenMoves(boardRepresentation, caseIndex);
+					auto newMoves = generateQueenMoves(boardRepresentation, caseIndex, isPiecePinned);
 					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
@@ -143,12 +148,17 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	std::vector<Move> generateRookMoves(const BoardRepresentation& boardRepresentation, int rookCase)
+	std::vector<Move> generateRookMoves(const BoardRepresentation& boardRepresentation, int rookCase, bool isPiecePinned = false)
 	{
 		std::vector<Move> moves;
+		std::vector<int> filteredOffsets; //Offset filtered in case of pinned piece
+		if (isPiecePinned)
+			filteredOffsets = getLegalOffsetPinnedPiece(boardRepresentation, rookCase, rookOffset);
+		else
+			filteredOffsets = rookOffset;
 
 		//Each iteration, move the piece of one case in the direction it can move to generate the moves
-		for (const int& currentOffset : rookOffset)
+		for (const int& currentOffset : filteredOffsets)
 		{
 			int currentCaseIndex = rookCase;
 			//Generate all possible moves in the direction the current offset
@@ -211,12 +221,17 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	std::vector<Move> generateBishopMoves(const BoardRepresentation& boardRepresentation, int bishopCase)
+	std::vector<Move> generateBishopMoves(const BoardRepresentation& boardRepresentation, int bishopCase, bool isPiecePinned)
 	{
 		std::vector<Move> moves;
+		std::vector<int> filteredOffsets; //Offset filtered in case of pinned piece
+		if (isPiecePinned)
+			filteredOffsets = getLegalOffsetPinnedPiece(boardRepresentation, bishopCase, bishopOffset);
+		else
+			filteredOffsets = bishopOffset;
 
 		//Each iteration, move the piece of one case in the direction it can move to generate the moves
-		for (const int& currentOffset : bishopOffset)
+		for (const int& currentOffset : filteredOffsets)
 		{
 			int currentCaseIndex = bishopCase;
 			//Generate all possible moves in the direction the current offset
@@ -295,7 +310,7 @@ namespace MoveGeneration
 	std::vector<Move> generateCastlingMoves(BoardRepresentation& boardRepresentation, int kingCase)
 	{
 		//GenerateCastlingMoves should not be call if king hes in check.
-		//It should have be checked before, else it<s a waste of time to check it two times
+		//It should have be checked before, else its a waste of time to check it two times
 		assert(!isPieceAttacked(boardRepresentation, kingCase));
 
 		std::vector<Move> possibleCastlings;
@@ -317,7 +332,7 @@ namespace MoveGeneration
 			bool isSpaceToCastle = true;
 			int kingDirection = (castle.from - castle.to < 0) ? 1 : -1;
 			for (int indexCase = kingCase + kingDirection;
-				indexCase != castle.to; indexCase += kingDirection)
+				indexCase != (castle.to+ kingDirection); indexCase += kingDirection)
 			{
 				if (!isPieceNone(boardRepresentation.board[indexCase]) ||
 					isPieceAttacked(boardRepresentation, indexCase))
@@ -332,12 +347,17 @@ namespace MoveGeneration
 		return possibleCastlings;
 	}
 
-	std::vector<Move> generateQueenMoves(const BoardRepresentation& boardRepresentation, int queenCase)
+	std::vector<Move> generateQueenMoves(const BoardRepresentation& boardRepresentation, int queenCase, bool isPiecePinned)
 	{
 		std::vector<Move> moves;
+		std::vector<int> filteredOffsets; //Offset filtered in case of pinned piece
+		if (isPiecePinned)
+			filteredOffsets = getLegalOffsetPinnedPiece(boardRepresentation, queenCase, queenOffset);
+		else
+			filteredOffsets = queenOffset;
 
 		//Each iteration, move the piece of one case in the direction it can move to generate the moves
-		for (const int& currentOffset : queenOffset)
+		for (const int& currentOffset : filteredOffsets)
 		{
 			int currentCaseIndex = queenCase;
 			//Generate all possible moves in the direction the current offset
@@ -371,6 +391,7 @@ namespace MoveGeneration
 	{
 		std::vector<Move> moves;
 		const int row = 8;
+
 
 		//Moving forward of one case if the case is empty
 		int step = (boardRepresentation.isWhiteTurn) ? row : -row;
@@ -597,6 +618,35 @@ namespace MoveGeneration
 	{
 		return generateMoves(boardRepresentation).size() == 0 &&
 			  !isPieceAttacked(boardRepresentation, kingCase);
+	}
+
+	std::vector<int> getLegalOffsetPinnedPiece(const BoardRepresentation & boardRepresentation, int pinnedPieceCase, std::vector<int> possibleOffsets)
+	{
+		//If the Piece is a knight or a pawn, this function should not be call
+		//Because the piece cant move without checking his king
+		auto pinnedPiece = boardRepresentation.board[pinnedPieceCase];
+		assert(!isPieceKnight(pinnedPiece) && !isPiecePawn(pinnedPiece));
+
+		//If the Piece Pinned is a bishop, rook or queen, search the King
+		//and return the offset in the opposite direction of the king (the piece still protect the king)
+		for (const int& currentOffset : knightOffset)
+		{
+			int currentCaseIndex = pinnedPieceCase;
+			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+
+			if (currentCaseIndex == -1) continue; //Outside of the board
+
+			auto currentCase = boardRepresentation.board[currentCaseIndex];
+			if (isPieceKing(currentCase) && boardRepresentation.isWhiteTurn == isPieceWhite(currentCase))
+			{
+				std::vector<int> pinnedPieceLegalOffset;
+				pinnedPieceLegalOffset.push_back(-1 * currentOffset);
+				return pinnedPieceLegalOffset;
+			}
+		}
+		//King not found: not normal: that means that th piece is not really pinned
+		assert(false);
+		return std::vector<int>();
 	}
 }
 

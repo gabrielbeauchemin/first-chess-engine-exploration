@@ -9,19 +9,15 @@ public:
 	Timer();
 	Timer(unsigned int msBeforeTimeout);
 	bool isTimeOut();
-	void forceTimeOut();
 	void setTimeMax(unsigned int msBeforeTimeout);
+	void forceTimeOut();
 
-	~Timer();
 	void reset();
 
 private:
 	unsigned int msBeforeTimeout;
 	std::chrono::time_point<std::chrono::system_clock> start, end;
-	bool timerDestruction = false;
-	std::thread thread;
-	bool _isTimeOut = false;
-
+	bool isForcedTimeOut = false;
 };
 
 #endif

@@ -379,7 +379,6 @@ namespace MoveGeneration
 				{
 					moves.push_back(Move{ queenCase,currentCaseIndex });
 				}
-				
 			}
 		}
 
@@ -391,7 +390,6 @@ namespace MoveGeneration
 	{
 		std::vector<Move> moves;
 		const int row = 8;
-
 
 		//Moving forward of one case if the case is empty
 		int step = (boardRepresentation.isWhiteTurn) ? row : -row;
@@ -431,24 +429,21 @@ namespace MoveGeneration
 		}
 
 		//Coup en passant if it is possible
-		if (boardRepresentation.isEnPensantPossible.first)
+		if (boardRepresentation.isEnPensantPossible.first )
 		{
-			//If the pawn that can be captured by en passant is at the side of the pawn
-			if (pawnCase + 1 == boardRepresentation.isEnPensantPossible.second) //Right side
+			static int directionsToCheck[] = { -1,1 };
+			for (int& sideDirection : directionsToCheck)
 			{
-				int posOppositePawn = pawnCase + 1;
-				int posAfterEnPassant = posOppositePawn + step;
-				moves.push_back(Move{ pawnCase, posAfterEnPassant });
-				
-			}
-			if (pawnCase - 1 == boardRepresentation.isEnPensantPossible.second) //Left side
-			{
-				int posOppositePawn = pawnCase - 1;
-				int posAfterEnPassant = posOppositePawn + step;
-				moves.push_back(Move{ pawnCase, posAfterEnPassant });
+				int sideOfPossibleEnPassant = mailbox[mailbox64[boardRepresentation.isEnPensantPossible.second] + sideDirection];
+				if (sideOfPossibleEnPassant == -1) break; //Outside of the board
+				if (sideOfPossibleEnPassant == pawnCase)
+				{
+					int posAfterEnPassant = boardRepresentation.isEnPensantPossible.second + step;
+					moves.push_back(Move{ pawnCase, posAfterEnPassant });
+
+				}
 			}
 		}
-
 
 		return moves;
 	}
@@ -600,7 +595,7 @@ namespace MoveGeneration
 		std::remove_if(movesToFilter.begin(), movesToFilter.end(), 
 			[&](const Move & move)
 		{
-			boardRepresentation.move(move);
+			boardRepresentation.makeMove(move);
 			bool isKingInCheck = isPieceAttacked(boardRepresentation, kingCase);
 			boardRepresentation.unmakeMove(move);
 			return isKingInCheck;
@@ -647,6 +642,36 @@ namespace MoveGeneration
 		//King not found: not normal: that means that th piece is not really pinned
 		assert(false);
 		return std::vector<int>();
+	}
+
+	bool isEnPassant(const BoardRepresentation& boardRepresentation, Move move)
+	{
+		if (!isPiecePawn(boardRepresentation.board[move.from]))
+			return false; 
+		if (!isPieceNone(boardRepresentation.board[move.to]))
+			return false;
+		if (isPieceWhite(boardRepresentation.board[move.from]))
+		{
+			if (move.from / 8 != 4) return false;
+		}
+		else
+		{
+			if (move.from / 8 != 3) return false;
+		}
+
+		const int row = 8;
+		int step = isPieceWhite(boardRepresentation.board[move.from]) ? row : -1 * row;
+		static int sideDirections[2] = { -1,1 };
+		for (int& sideDirection : sideDirections)
+		{
+			int possiblePosEnPassant = mailbox[mailbox64[move.from] + step + sideDirection];
+			if (possiblePosEnPassant != -1 && possiblePosEnPassant == move.to)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 

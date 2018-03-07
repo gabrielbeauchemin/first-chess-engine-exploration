@@ -1,6 +1,103 @@
 #include "BoardRepresentation.h"
 #include "IlegalMoveException.h"
 #include <assert.h>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+
+//init board from FEN notation: https://fr.wikipedia.org/wiki/Notation_Forsyth-Edwards
+//Used also during UTC protocol
+BoardRepresentation::BoardRepresentation(std::string fen)
+{
+	auto split = [](const std::string& s, char delimiter)
+	{
+		std::vector<std::string> tokens;
+		std::string token;
+		std::istringstream tokenStream(s);
+		while (std::getline(tokenStream, token, delimiter))
+		{
+			tokens.push_back(token);
+		}
+		return tokens;
+	};
+
+	
+	std::vector<std::string> fenSplitted = split(fen, ' ');
+
+	//Fen Notation has 6 parts:
+
+	// 1)Pieces Position
+	//rook(tour), knight(cavalier), bishop(fou), queen(dame), king(roi) et pawn(pion).
+	static std::map<int, Piece> charToPiece{ {'r', Piece::whiteRook},{'n', Piece::whiteKnight },{ 'b', Piece::whiteBishop },{ 'q', Piece::whiteQueen },{ 'k', Piece::whiteKing },{ 'p', Piece::whitePawn },{ 'R', Piece::blackRook },{ 'N', Piece::blackKnight },{ 'B', Piece::blackBishop },{ 'Q', Piece::blackQueen },{ 'K', Piece::blackKing },{ 'P', Piece::blackPawn } };
+	int indexBoard = 0;
+	std::vector<std::string> rowPieces = split(fenSplitted[0], '/');
+	for (std::string& row : rowPieces)
+	{
+		for (int indexCase = 0; indexCase < 8; )
+		{
+			char currentCase = row[indexCase];
+			//Number between 1 to 8 indicated the number of empty cases
+			if (isdigit(currentCase))
+			{
+				char nbrEmtyCases = atoi(&currentCase);
+				assert(nbrEmtyCases > 0 && nbrEmtyCases < 9);
+				for (int temp = 0; temp < nbrEmtyCases; ++temp)
+				{
+					this->board[indexBoard] = Piece::none;
+					++indexBoard;
+					++indexCase;
+				}
+			}
+			else
+			{
+				Piece currentPiece = charToPiece.find(currentCase)->second;
+				this->board[indexBoard] = currentPiece;
+				++indexBoard;
+				++indexCase;
+			}
+		}
+	}
+	// 2)Who is turn to play
+	if (fenSplitted[1][0] == 'w')
+		this->isWhiteTurn = true;
+	else this->isWhiteTurn = false;
+
+	// 3)Possible rook
+	if (fenSplitted[2][0] == '-')
+	{
+		this->canWhiteCastle = false;
+		if (fenSplitted[2].substr(1).find('-') != std::string::npos) 
+			this->canBlackCastle = false;
+		else this->canBlackCastle = true;
+	}
+	else
+	{
+		this->canWhiteCastle = true;
+		if (fenSplitted[2].substr(1).find('-') != std::string::npos)
+			this->canBlackCastle = false;
+		else this->canBlackCastle = true;
+	}
+	
+	// 4)Possible en Passant
+	if (fenSplitted[3][0] != '-')
+	{
+		static std::map<char, int> algebraicToColumnIndex{ { 'a',0 },{ 'b',1 },{ 'c',2 },{ 'd',3 },{ 'e',4 },{ 'f',5 },{ 'g',6 },{ 'h',7 } };
+		int columnIndex = algebraicToColumnIndex.find(fenSplitted[3][0])->second;
+		int rowIndex = atoi(&fenSplitted[3][1]) -1;
+		int enPassantchessIndex = (rowIndex * 8) + columnIndex;
+		this->isEnPensantPossible = std::pair<bool, int>{ true, enPassantchessIndex };
+	}
+	// 5)Number of reversible moves
+	this->reversibleMovesInRow = std::stoi(fenSplitted[4]);
+
+	// 6)Number of total complete moves
+	//Not used for now
+
+}
 
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
@@ -37,6 +134,38 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 		this->board[pieceToPlace.first] = pieceToPlace.second;
 }
 
+BoardRepresentation & BoardRepresentation::operator=(const BoardRepresentation& other)
+{
+	for (int i = 0; i<64; ++i)
+		this->board[i] = other.board[i];
+	this->canBlackCastle = other.canBlackCastle;
+	this->canWhiteCastle = other.canWhiteCastle;
+	this->isEnPensantPossible = other.isEnPensantPossible;
+	this->isWhiteTurn = other.isWhiteTurn;
+	this->justLooseRightCastle = other.justLooseRightCastle;
+	this->lastCaptures = other.lastCaptures;
+	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
+	this->nbrMovesDone = nbrMovesDone;
+	this->reversibleMovesInRow = other.reversibleMovesInRow;
+
+	return *this;
+}
+
+BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
+{
+	for (int i = 0; i<64; ++i)
+		this->board[i] = other.board[i];
+	this->canBlackCastle = other.canBlackCastle;
+	this->canWhiteCastle = other.canWhiteCastle;
+	this->isEnPensantPossible = other.isEnPensantPossible;
+	this->isWhiteTurn = other.isWhiteTurn;
+	this->justLooseRightCastle = other.justLooseRightCastle;
+	this->lastCaptures = other.lastCaptures;
+	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
+	this->nbrMovesDone = nbrMovesDone;
+	this->reversibleMovesInRow = other.reversibleMovesInRow;
+}
+
 bool BoardRepresentation::operator==(const BoardRepresentation & other)
 {
 	for (int i = 0; i < 64; ++i)
@@ -50,16 +179,14 @@ bool BoardRepresentation::operator==(const BoardRepresentation & other)
 
 //Only move the piece requested without checking for the
 //Legality of it (MoveGeneration will do it)
-void BoardRepresentation::move(Move move)
+void BoardRepresentation::makeMove(Move move)
 {  
 	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
 	assert(!isPieceNone(this->board[move.from]));
-	if (!isPieceNone(this->board[move.to]) &&
-		(isPieceWhite(this->board[move.to]) == this->isWhiteTurn))
-	{
-		std::string t = this->toString();
-		assert(false);
-	}
+	assert(isPieceNone(this->board[move.to]) ||
+		(isPieceWhite(this->board[move.to]) != this->isWhiteTurn));
+	
+	this->lastEnPassantMoves[nbrMovesDone] = isEnPensantPossible; //Help for unmake move
 
 	if (isMoveCastling(move)) //Case Castling:
 	{
@@ -77,6 +204,15 @@ void BoardRepresentation::move(Move move)
 			this->canWhiteCastle = false;
 		else
 			this->canBlackCastle = false;
+	}
+	else if(MoveGeneration::isEnPassant(*this,move))
+	{
+		//Check that the en passant is legal. 
+		//To check if the opposite pawn is really at the side of the pawn, we should have the special cases of the pawns at the limite of the board. We wont do it. Anyway, Move Generation should have already checked it.
+		assert(this->isEnPensantPossible.first == true);
+		assert(this->isEnPensantPossible.second + 1 == move.from || this->isEnPensantPossible.second + -1 == move.from);
+		swap<Piece>(board, move.from, move.to); //Move the piece
+		this->board[this->isEnPensantPossible.second] = Piece::none; //Remove captured piece
 	}
 	else //Not Castling, normal move
 	{
@@ -123,6 +259,7 @@ void BoardRepresentation::move(Move move)
 
 	//En passant is only good for one move
 	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
+
 	//Check if En passant in possible for the next move
 	if (movesPermitEnPassant(move))
 	{
@@ -152,6 +289,14 @@ void BoardRepresentation::unmakeMove(Move move)
 			this->canBlackCastle = true;
 		else
 			this->canWhiteCastle = true;
+	}
+	else if (MoveGeneration::isEnPassant(*this, move))
+	{
+		assert(this->isEnPensantPossible.first == false);
+		swap<Piece>(board, move.from, move.to); //Move the piece
+		//Put back the pawn captured last move by en passant
+		Piece capturedEnPassantPawn = this->isWhiteTurn ? Piece::whitePawn : Piece::blackPawn;
+		this->board[this->isEnPensantPossible.second] = capturedEnPassantPawn;
 	}
 	else //Not Castling, normal move
 	{
@@ -187,8 +332,9 @@ void BoardRepresentation::unmakeMove(Move move)
 	}
 	else this->reversibleMovesInRow = lastReversibleMovesinRow;
 
-	//Unmaking the move can only remove the possibility of an En passant, not create one
-	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
+	auto lastEnPassant = this->lastEnPassantMoves.find(nbrMovesDone - 1);
+	this->isEnPensantPossible = lastEnPassant->second;
+	this->lastEnPassantMoves.erase(lastEnPassant);
 
 	--nbrMovesDone;
 }
@@ -276,6 +422,8 @@ bool BoardRepresentation::movesPermitEnPassant(Move lastMove)
 		return oppositePawnLeftSide || oppositePawnRightSide;
 	}
 }
+
+
 
 template<class T>
 void BoardRepresentation::swap(T array[], int i, int j)

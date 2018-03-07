@@ -12,27 +12,10 @@ class BoardRepresentation
 {
 public:
 	BoardRepresentation();
-
+	BoardRepresentation(std::string fen);
 	BoardRepresentation(std::vector<std::pair<int, Piece>> piecesToPlace);
-
-	//Should not usde assignement because it is costly to do an memory access. 
-	//Use unmakeMove method instead
-	BoardRepresentation & operator= (const BoardRepresentation) = delete;
-	BoardRepresentation(const BoardRepresentation& other)
-	{
-		for(int i=0; i<64; ++i)
-		   this->board[i] = other.board[i];
-		this->canBlackCastle = other.canBlackCastle;
-		this->canWhiteCastle = other.canWhiteCastle;
-		this->isEnPensantPossible = other.isEnPensantPossible;
-		this->isWhiteTurn = other.isWhiteTurn;
-		this->justLooseRightCastle = other.justLooseRightCastle;
-		this->lastCaptures = other.lastCaptures;
-		this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
-		this->nbrMovesDone = nbrMovesDone;
-		this->reversibleMovesInRow = other.reversibleMovesInRow;
-	}
-
+	BoardRepresentation & operator= (const BoardRepresentation& boardRepresentation);
+	BoardRepresentation(const BoardRepresentation& other);
 
 	bool operator==(const BoardRepresentation& other);
 
@@ -43,13 +26,14 @@ public:
 	bool canWhiteCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
-	void move(Move move);
+	void makeMove(Move move);
 	void unmakeMove(Move move);
 	std::string toString();
 
 private: 
 	/*Help for unmakeMove*/
-	std::map<int,Piece> lastCaptures;
+	std::map<int,Piece> lastCaptures; //nbrMove:Piece
+	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //nbrMove: isEnPensantPossible
 	bool justLooseRightCastle = false;
 	int lastReversibleMovesinRow;
 

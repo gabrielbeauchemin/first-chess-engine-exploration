@@ -37,6 +37,12 @@
     <Filter Include="Source Files\MoveGeneration">
       <UniqueIdentifier>{4eb28513-fc5f-4e96-931c-fed7c17c1adb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Protocols">
+      <UniqueIdentifier>{c0deaae7-e109-445f-865c-e07a5ea560f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Protocols">
+      <UniqueIdentifier>{ecf09575-6aef-44e7-998c-9d35b4e300d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardRepresentation.cpp">
@@ -54,6 +60,18 @@
     <ClCompile Include="Evaluation.cpp">
       <Filter>Source Files\Evaluation</Filter>
     </ClCompile>
+    <ClCompile Include="UCIProtocol.cpp">
+      <Filter>Source Files\Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="MinMax.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
+    <ClCompile Include="Search.cpp">
+      <Filter>Source Files\Search</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h">
@@ -70,6 +88,18 @@
     </ClInclude>
     <ClInclude Include="Evaluation.h">
       <Filter>Header Files\Evaluation</Filter>
+    </ClInclude>
+    <ClInclude Include="UCIProtocol.h">
+      <Filter>Header Files\Protocols</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="MinMax.h">
+      <Filter>Header Files\Search</Filter>
+    </ClInclude>
+    <ClInclude Include="Search.h">
+      <Filter>Header Files\Search</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

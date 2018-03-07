@@ -116,6 +116,10 @@
     <ClCompile Include="MoveGeneration.cpp" />
     <ClCompile Include="Piece.cpp" />
     <ClCompile Include="Evaluation.cpp" />
+    <ClCompile Include="MinMax.cpp" />
+    <ClCompile Include="Search.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="UCIProtocol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardRepresentation.h" />
@@ -123,6 +127,10 @@
     <ClInclude Include="Move.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="Evaluation.h" />
+    <ClInclude Include="MinMax.h" />
+    <ClInclude Include="Search.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="UCIProtocol.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

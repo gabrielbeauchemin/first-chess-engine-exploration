@@ -22,6 +22,7 @@ namespace MoveGeneration
 	bool isKingCheckmate(BoardRepresentation& boardRepresentation, int kingCase);
 	bool isKingStealMate(BoardRepresentation& boardRepresentation, int kingCase);
 	std::vector<int> getLegalOffsetPinnedPiece(const BoardRepresentation& boardRepresentation, int PinnedPieceCase, std::vector<int> possibleOffsets);
+	bool isEnPassant(const BoardRepresentation& boardRepresentation, Move move);
 	
 
 	

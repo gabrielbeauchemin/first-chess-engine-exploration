@@ -29,6 +29,7 @@ public:
 	void makeMove(Move move);
 	void unmakeMove(Move move);
 	std::string toString();
+	int getCurrentDepth();
 
 private: 
 	/*Help for unmakeMove*/
@@ -36,8 +37,7 @@ private:
 	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //nbrMove: isEnPensantPossible
 	bool justLooseRightCastle = false;
 	int lastReversibleMovesinRow;
-
-	int nbrMovesDone = 0;
+	int currentDepth = 0;
 	template<class T>
 	void swap(T array[], int i, int j);
 	bool isMoveCastling(Move move);

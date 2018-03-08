@@ -2,9 +2,9 @@
 #define Move_H 
 
 #include <string>
-#include "InvalidChessCaseException.h"
 #include <unordered_map>
 #include "Piece.h"
+#include <assert.h>
 
 /* Representation of a chess move that a piece have from
    a case to another.*/
@@ -33,9 +33,9 @@ public:
 	Move(int from, int to, Piece promotion = Piece::none)
 		: from{from}, to{to}, promotion{promotion}
 	{
-		auto isOutBound = [](int chessCase) { return (chessCase > 63 || chessCase < 0); };
-		if (isOutBound(from) || isOutBound(to))
-			throw InvalidChessCaseException();
+		//-1 accepted as error message (considered not outbound
+		auto isOutBound = [](int chessCase) { return (chessCase > 63 || chessCase < -1); };
+		assert(!isOutBound(from) && !isOutBound(to));
 	}
 
 	std::string getCoordinateAlgebraicNotation()

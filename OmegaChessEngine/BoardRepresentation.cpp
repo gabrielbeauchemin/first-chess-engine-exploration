@@ -145,7 +145,7 @@ BoardRepresentation & BoardRepresentation::operator=(const BoardRepresentation& 
 	this->justLooseRightCastle = other.justLooseRightCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
-	this->nbrMovesDone = nbrMovesDone;
+	this->currentDepth = currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
 
 	return *this;
@@ -162,7 +162,7 @@ BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
 	this->justLooseRightCastle = other.justLooseRightCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
-	this->nbrMovesDone = nbrMovesDone;
+	this->currentDepth = currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
 }
 
@@ -186,7 +186,7 @@ void BoardRepresentation::makeMove(Move move)
 	assert(isPieceNone(this->board[move.to]) ||
 		(isPieceWhite(this->board[move.to]) != this->isWhiteTurn));
 	
-	this->lastEnPassantMoves[nbrMovesDone] = isEnPensantPossible; //Help for unmake move
+	this->lastEnPassantMoves[currentDepth] = isEnPensantPossible; //Help for unmake move
 
 	if (isMoveCastling(move)) //Case Castling:
 	{
@@ -234,7 +234,7 @@ void BoardRepresentation::makeMove(Move move)
 		//In case of Capture
 		if ( !isPieceNone(board[move.to]))
 		{
-			this->lastCaptures[nbrMovesDone] = board[move.to]; //Help for unmakeMove
+			this->lastCaptures[currentDepth] = board[move.to]; //Help for unmakeMove
 			board[move.to] = Piece::none;
 		}
 
@@ -266,7 +266,7 @@ void BoardRepresentation::makeMove(Move move)
 		this->isEnPensantPossible = std::pair<bool, int>(true, move.to);
 	};
 
-	++nbrMovesDone;
+	++currentDepth;
 }
 
 void BoardRepresentation::unmakeMove(Move move)
@@ -316,7 +316,7 @@ void BoardRepresentation::unmakeMove(Move move)
 		swap<Piece>(board, move.to, move.from);
 
 		//In case that a piece got Captured the move before
-		auto lastCapture = this->lastCaptures.find(nbrMovesDone - 1);
+		auto lastCapture = this->lastCaptures.find(currentDepth - 1);
 		if (lastCaptures.end() != lastCapture)
 		{
 			assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
@@ -332,11 +332,11 @@ void BoardRepresentation::unmakeMove(Move move)
 	}
 	else this->reversibleMovesInRow = lastReversibleMovesinRow;
 
-	auto lastEnPassant = this->lastEnPassantMoves.find(nbrMovesDone - 1);
+	auto lastEnPassant = this->lastEnPassantMoves.find(currentDepth - 1);
 	this->isEnPensantPossible = lastEnPassant->second;
 	this->lastEnPassantMoves.erase(lastEnPassant);
 
-	--nbrMovesDone;
+	--currentDepth;
 }
 
 std::string BoardRepresentation::toString()
@@ -377,6 +377,11 @@ std::string BoardRepresentation::toString()
 	stringBoard += "#################################################\r\n";
 
 	return stringBoard;
+}
+
+int BoardRepresentation::getCurrentDepth()
+{
+	return this->currentDepth;
 }
 
 bool BoardRepresentation::isMoveCastling(Move move)

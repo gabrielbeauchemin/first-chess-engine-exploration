@@ -41,6 +41,7 @@ namespace MoveGeneration
 
 	std::vector<Move> generateMoves(BoardRepresentation& boardRepresentation)
 	{
+		auto t = boardRepresentation.toString();
 		//Find king index
 		int kingIndex;
 		for (int caseIndex = 0; caseIndex < 64; ++caseIndex)
@@ -88,23 +89,9 @@ namespace MoveGeneration
 				}
 				else if (isPiecePawn(currentPiece))
 				{
-					if (isPawnMovePromotion(boardRepresentation, caseIndex))
-					{
-						std::vector<Piece> possiblePromotion = (boardRepresentation.isWhiteTurn)
-							                                   ? getWhitePieces() : getBlackPieces();
-						for (auto& promotionType : possiblePromotion)
-						{
-							std::vector<Move> promotionMove = generatePawnMoves(boardRepresentation, caseIndex, promotionType);
-							if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, promotionMove, kingIndex);
-							moves.insert(moves.end(), promotionMove.begin(), promotionMove.end());
-						}
-					}
-					else
-					{
-						auto newMoves = generatePawnMoves(boardRepresentation, caseIndex);
-						if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
-						moves.insert(moves.end(), newMoves.begin(), newMoves.end());
-					}
+					auto newMoves = generatePawnMoves(boardRepresentation, caseIndex);
+					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
+					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
 				else if (isPieceBishop(currentPiece))
 				{
@@ -179,7 +166,6 @@ namespace MoveGeneration
 				}
 				else //The case is empty
 				{
-					
 					moves.push_back(Move{ rookCase,currentCaseIndex });
 				}
 				
@@ -314,25 +300,30 @@ namespace MoveGeneration
 		assert(!isPieceAttacked(boardRepresentation, kingCase));
 
 		std::vector<Move> possibleCastlings;
-		std::vector<Move> castlingMoves = (boardRepresentation.isWhiteTurn)
-			                       ? std::vector<Move>{ Move{ 4,6 }, Move{ 4,2 }}
-		                           : std::vector<Move>{ Move{ 60,62 }, Move{ 60,58 }};
-
-		//If king has already castle or move, it doesnt have the right to castle					    
-		if ((boardRepresentation.isWhiteTurn && !boardRepresentation.canWhiteCastle) ||
-			(!boardRepresentation.isWhiteTurn && !boardRepresentation.canBlackCastle))
+		std::vector<Move> castlingMoves;
+		if (boardRepresentation.isWhiteTurn)
 		{
-			return std::vector<Move>{};
+			if (boardRepresentation.canWhiteKingCastle)
+				castlingMoves.push_back(Move{ 4,6 });
+			if (boardRepresentation.canWhiteQueenCastle)
+				castlingMoves.push_back(Move{ 4,2 });
+		}
+		else
+		{
+			if (boardRepresentation.canBlackKingCastle)
+				castlingMoves.push_back(Move{ 60,62 });
+			if (boardRepresentation.canBlackQueenCastle)
+				castlingMoves.push_back(Move{ 60,58 });
 		}
 
-		//For both possible castling
+		//For possible castling
 		for (auto castle : castlingMoves)
 		{
 			//If there is place between the king and the rook
 			bool isSpaceToCastle = true;
 			int kingDirection = (castle.from - castle.to < 0) ? 1 : -1;
 			for (int indexCase = kingCase + kingDirection;
-				indexCase != (castle.to+ kingDirection); indexCase += kingDirection)
+				!isPieceRook(boardRepresentation.board[indexCase]); indexCase += kingDirection)
 			{
 				if (!isPieceNone(boardRepresentation.board[indexCase]) ||
 					isPieceAttacked(boardRepresentation, indexCase))
@@ -341,7 +332,11 @@ namespace MoveGeneration
 					break; 
 				}
 			}
-			if (isSpaceToCastle) possibleCastlings.push_back(castle);
+			if (isSpaceToCastle)
+			{
+				possibleCastlings.push_back(castle);
+			}
+
 		}
 		
 		return possibleCastlings;
@@ -371,8 +366,8 @@ namespace MoveGeneration
 				{
 					if (isPieceWhite(boardRepresentation.board[currentCaseIndex]) != boardRepresentation.isWhiteTurn)
 						moves.push_back(Move{ queenCase,currentCaseIndex }); //Capture
-																			 //its a capture or the piece got blocked by a piece of its camp, 
-																		    //in both case pass to the next direction
+					//its a capture or the piece got blocked by a piece of its camp, 
+				   //in both case pass to the next direction
 					break;
 				}
 				else //The case is empty
@@ -391,12 +386,27 @@ namespace MoveGeneration
 		std::vector<Move> moves;
 		const int row = 8;
 
+		//In case of promotion
+		if (isPawnMovePromotion(boardRepresentation, pawnCase))
+		{
+			std::vector<Piece> possiblePromotion = (boardRepresentation.isWhiteTurn)
+				? std::vector<Piece>{Piece::whiteBishop, Piece::whiteKnight, Piece::whiteRook, Piece:: whiteQueen}
+			    : std::vector<Piece>{ Piece::blackBishop, Piece::blackKnight, Piece::blackRook, Piece::blackQueen };
+
+			for (auto& promotionType : possiblePromotion)
+			{
+				std::vector<Move> promotionMove = generatePawnPromotionMoves(boardRepresentation, pawnCase, promotionType);
+				moves.insert(moves.end(), promotionMove.begin(), promotionMove.end());
+			}
+			return moves;
+		}
+		
 		//Moving forward of one case if the case is empty
 		int step = (boardRepresentation.isWhiteTurn) ? row : -row;
 		bool isNextCaseEmpty = isPieceNone(boardRepresentation.board[pawnCase + step]);
-		if(isNextCaseEmpty)
-		   moves.push_back(Move{ pawnCase,pawnCase + step });
-
+		if (isNextCaseEmpty)
+			moves.push_back(Move{ pawnCase,pawnCase + step });
+		
 		//Moving forward of two cases is only possible if the pawn is on its initial case
 		bool isOnInitialRow = (boardRepresentation.isWhiteTurn) ? pawnCase / row == 1
 			                                      : pawnCase / row == 6;
@@ -448,11 +458,22 @@ namespace MoveGeneration
 		return moves;
 	}
 
-	std::vector<Move> generatePawnMoves(const BoardRepresentation& board, int pawnCase, Piece promotion)
+	std::vector<Move> generatePawnPromotionMoves(const BoardRepresentation& board, int pawnCase, Piece promotion)
 	{
+		std::vector<Move> moves;
 		const int row = 8;
 		int step = (board.isWhiteTurn) ? row : -row;
-		return std::vector<Move>{ Move{ pawnCase,pawnCase + step, promotion }};
+		//Avance of one case
+		if (isPieceNone(board.board[pawnCase + step]))
+		moves.push_back(Move{ pawnCase,pawnCase + step, promotion });
+		//Capture Left
+		if (isPieceNone(board.board[pawnCase + step - 1]))
+			moves.push_back(Move{ pawnCase,pawnCase + step - 1, promotion });
+		//Capture Right
+		if(isPieceNone(board.board[pawnCase + step + 1]))
+			moves.push_back(Move{ pawnCase,pawnCase + step + 1, promotion });
+
+		return moves;
 	}
 
 	bool isPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase)
@@ -522,7 +543,6 @@ namespace MoveGeneration
 				auto currentCase = boardRepresentation.board[currentCaseIndex];
 				if (!isPieceNone(currentCase))
 				{
-					auto t = isPieceWhite(currentCase);
 					//piece meets a rook or queen from opposite camp, hes in check
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
 						&& (isPieceQueen(currentCase) || isPieceRook(currentCase)))
@@ -582,11 +602,11 @@ namespace MoveGeneration
 	{
 		if (boardRepresentation.isWhiteTurn)
 		{
-			return (pawnCaseBeforeMove / 8) == 6;
+			return ((pawnCaseBeforeMove / 8) == 6);
 		}
 		else
 		{
-			return (pawnCaseBeforeMove / 8) == 1;
+			return ((pawnCaseBeforeMove / 8) == 1);
 		}
 	}
 

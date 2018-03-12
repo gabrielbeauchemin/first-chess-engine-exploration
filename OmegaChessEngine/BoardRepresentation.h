@@ -22,8 +22,10 @@ public:
 	Piece board[64];
 	bool isWhiteTurn;
 	std::pair<bool, int> isEnPensantPossible; //is it possible and if yes which pawn position can be eaten en passant
-	bool canBlackCastle;
-	bool canWhiteCastle;
+	bool canBlackKingCastle;
+	bool canBlackQueenCastle;
+	bool canWhiteKingCastle;
+	bool canWhiteQueenCastle;
 	int reversibleMovesInRow; //For the 50 moves rules
 	
 	void makeMove(Move move);
@@ -35,7 +37,8 @@ private:
 	/*Help for unmakeMove*/
 	std::map<int,Piece> lastCaptures; //nbrMove:Piece
 	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //nbrMove: isEnPensantPossible
-	bool justLooseRightCastle = false;
+	bool justLooseRightKingCastle = false;
+	bool justLooseRightQueenCastle = false;
 	int lastReversibleMovesinRow;
 	int currentDepth = 0;
 	template<class T>

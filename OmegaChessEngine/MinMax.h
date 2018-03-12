@@ -19,8 +19,8 @@ private:
 	std::function<std::vector<Move>(BoardRepresentation)> generateLegalMoves;
 	std::function<bool(BoardRepresentation)> stopSearching;
 
-	std::pair<int, Move> maxValue(BoardRepresentation boardRepresentation, bool makesWhiteWin); //Represent the side of the board of the engine
-	int minValue(BoardRepresentation boardRepresentation, bool makesWhiteWin); //Represent the opposite player
+	std::pair<int, Move> maxValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin); //Represent the side of the board of the engine
+	int minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin); //Represent the opposite player
 };
 
 #endif

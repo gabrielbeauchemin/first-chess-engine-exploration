@@ -12,7 +12,7 @@ MinMax::MinMax(std::function<int(BoardRepresentation)> getHeuristic, std::functi
 {
 }
 
-std::pair<int, Move> MinMax::maxValue(BoardRepresentation boardRepresentation, bool makesWhiteWin)
+std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin)
 {
 	if (this->stopSearching(boardRepresentation))
 		return std::pair<int, Move>(this->getHeuristic(boardRepresentation), Move{ -1, -1 });
@@ -53,7 +53,7 @@ std::pair<int, Move> MinMax::maxValue(BoardRepresentation boardRepresentation, b
 	return std::pair<int, Move>(v, bestMove);
 }
 
-int MinMax::minValue(BoardRepresentation boardRepresentation, bool makesWhiteWin)
+int MinMax::minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin)
 {
 	if (this->stopSearching(boardRepresentation))
 		return this->getHeuristic(boardRepresentation);

@@ -41,7 +41,6 @@ namespace MoveGeneration
 
 	std::vector<Move> generateMoves(BoardRepresentation& boardRepresentation)
 	{
-		auto t = boardRepresentation.toString();
 		//Find king index
 		int kingIndex;
 		for (int caseIndex = 0; caseIndex < 64; ++caseIndex)
@@ -266,6 +265,7 @@ namespace MoveGeneration
 				{
 					//The opposite piece should not be protected to be captured by the king
 					Piece tmpKing = boardRepresentation.board[kingCase];
+					assert(isPieceKing(tmpKing));
 					boardRepresentation.board[kingCase] = Piece::none;
 					if(!isPieceAttacked(boardRepresentation, currentCaseIndex))
 					   moves.push_back(Move{ kingCase,currentCaseIndex }); 
@@ -281,6 +281,7 @@ namespace MoveGeneration
 				//The king should not be in check at this new case
 				//Remove temporarly the king to evaluate if the case is attacked
 				Piece tmpKing = boardRepresentation.board[kingCase]; 
+				assert(isPieceKing(tmpKing));
 				boardRepresentation.board[kingCase] = Piece::none;
 				if (!isPieceAttacked(boardRepresentation, currentCaseIndex))
 				   moves.push_back(Move{ kingCase,currentCaseIndex });
@@ -504,7 +505,7 @@ namespace MoveGeneration
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
 						&& isPiecePawn(currentCase) && firstOffset)
 					{
-						//boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
 						return true;
 
 					}
@@ -625,6 +626,7 @@ namespace MoveGeneration
 
 	bool isKingCheckmate(BoardRepresentation & boardRepresentation, int kingCase)
 	{
+		assert(isPieceKing(boardRepresentation.board[kingCase]));
 		return isPieceAttacked(boardRepresentation, kingCase) &&
 			   generateMoves(boardRepresentation).size() == 0;
 	}

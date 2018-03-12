@@ -199,7 +199,6 @@ void BoardRepresentation::makeMove(Move move)
 	assert(isPieceNone(this->board[move.to]) ||
 		(isPieceWhite(this->board[move.to]) != this->isWhiteTurn));
 	
-
 	this->lastEnPassantMoves[currentDepth] = isEnPensantPossible; //Help for unmake move
 
 	if (isMoveCastling(move)) //Case Castling:
@@ -240,6 +239,7 @@ void BoardRepresentation::makeMove(Move move)
 		//King moves looses the right to castle
 		if (isPieceKing(board[move.from]))
 		{
+			
 			if (isWhiteTurn)
 			{
 				this->canWhiteQueenCastle = false;
@@ -330,8 +330,9 @@ void BoardRepresentation::makeMove(Move move)
 
 void BoardRepresentation::unmakeMove(Move move)
 {
-	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);	
-
+	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
+	assert(!isPieceNone(board[move.to]));
+		
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.to, move.from); //Swap King

@@ -12,15 +12,18 @@ Search::Search(int msMaxByMove)
 
 Move Search::run(BoardRepresentation b)
 {
-	int currentDepth = 2;
+	int currentDepth = 4;
 	Move bestMoveFound{ -1,-1 };
 	int bestHeuristic =  b.isWhiteTurn ? -1 * Evaluation::biggestEvaluation : Evaluation::biggestEvaluation;
 
 	timer.reset();
 	while (true)
 	{
-		this->minMax = MinMax{ Evaluation::evaluate, MoveGeneration::generateMoves,
-			[&](BoardRepresentation b) {return timer.isTimeOut() || b.getCurrentDepth() > currentDepth; } };
+		auto stopSearching = [currentDepth,this](BoardRepresentation& b) 
+		{
+			return timer.isTimeOut() || b.getCurrentDepth() >= currentDepth; 
+		};
+		this->minMax = MinMax{ Evaluation::evaluate, MoveGeneration::generateMoves, stopSearching };
 		std::pair<int, Move> res = this->minMax.run(b);
 		if (b.isWhiteTurn)
 		{

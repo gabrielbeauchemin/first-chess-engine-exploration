@@ -4,6 +4,10 @@
 #include "../OmegaChessEngine/Piece.h"
 #include "../OmegaChessEngine/Piece.cpp"
 #include "../OmegaChessEngine/BoardRepresentation.h"
+#include <assert.h>
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace MoveGeneration;
@@ -33,13 +37,13 @@ namespace UnitTests
 			//Place knight in the center at position e4
 			std::vector<std::pair<int, Piece>> bishopCenter{ std::pair<int,Piece> {28, Piece::whiteBishop } };
 			BoardRepresentation boardRepresentation{ bishopCenter };
-			int nbrPossibleMoves = generateBishopMoves(boardRepresentation, 28).size();
+			int nbrPossibleMoves = generateBishopMoves(boardRepresentation, 28, false).size();
 			Assert::AreEqual(nbrPossibleMoves, 13);
 
 			//Place knight in the center at position b2
 			std::vector<std::pair<int, Piece>> bishopCorner{ std::pair<int,Piece> {9, Piece::whiteBishop } };
 			BoardRepresentation boardRepresentation2{ bishopCorner };
-			nbrPossibleMoves = generateBishopMoves(boardRepresentation2, 9).size();
+			nbrPossibleMoves = generateBishopMoves(boardRepresentation2, 9, false).size();
 			Assert::AreEqual(nbrPossibleMoves, 9);
 		}
 
@@ -48,13 +52,13 @@ namespace UnitTests
 			//Place knight in the center at position e4
 			std::vector<std::pair<int, Piece>> queenCenter{ std::pair<int,Piece> {28, Piece::whiteQueen } };
 			BoardRepresentation boardRepresentation{ queenCenter };
-			int nbrPossibleMoves = generateQueenMoves(boardRepresentation, 28).size();
+			int nbrPossibleMoves = generateQueenMoves(boardRepresentation, 28, false).size();
 			Assert::AreEqual(nbrPossibleMoves, 27);
 
 			//Place knight in the center at position b2
 			std::vector<std::pair<int, Piece>> queenCorner{ std::pair<int,Piece> {9, Piece::whiteQueen } };
 			BoardRepresentation boardRepresentation2{ queenCorner };
-			nbrPossibleMoves = generateQueenMoves(boardRepresentation2, 9).size();
+			nbrPossibleMoves = generateQueenMoves(boardRepresentation2, 9, false).size();
 			Assert::AreEqual(nbrPossibleMoves, 23);
 		}
 
@@ -197,6 +201,10 @@ namespace UnitTests
 			//Test if No Castle possible
 			BoardRepresentation initialBoard{};
 			Assert::AreEqual( (int)generateCastlingMoves(initialBoard, 4).size(), 0);
+			queenSideCastling.board[1] = Piece::whiteKnight; //only a knight in the way
+			Assert::AreEqual((int)generateCastlingMoves(initialBoard, 4).size(), 0);
+			queenSideCastling.board[5] = Piece::whiteBishop; //only a bishop in the way
+			Assert::AreEqual((int)generateCastlingMoves(initialBoard, 4).size(), 0);
 
 			/* White King can castle both ways*/
 			BoardRepresentation bothCastlingPossible{};
@@ -256,13 +264,13 @@ namespace UnitTests
 
 			/* Test pawn that are blocked*/
 			BoardRepresentation initialBoardRepresentation{};
-			initialBoardRepresentation.move(Move{ 12,28 });
-			initialBoardRepresentation.move(Move{ 52,36 }); //Both pawn cant move
+			initialBoardRepresentation.makeMove(Move{ 12,28 });
+			initialBoardRepresentation.makeMove(Move{ 52,36 }); //Both pawn cant move
 			Assert::AreEqual(0, (int) generatePawnMoves(initialBoardRepresentation, 28).size());
-			initialBoardRepresentation.move(Move{ 8,24 }); // So its black turn and prepare to block another 2 pawns
+			initialBoardRepresentation.makeMove(Move{ 8,24 }); // So its black turn and prepare to block another 2 pawns
 			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 36).size());
-			initialBoardRepresentation.move(Move{ 48,40 });
-			initialBoardRepresentation.move(Move{ 24,32 }); //After that move, the two pawn on A row are blocked
+			initialBoardRepresentation.makeMove(Move{ 48,40 });
+			initialBoardRepresentation.makeMove(Move{ 24,32 }); //After that move, the two pawn on A row are blocked
 			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 40).size());
 			initialBoardRepresentation.isWhiteTurn = true;
 			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 32).size());
@@ -271,10 +279,10 @@ namespace UnitTests
 			std::vector<std::pair<int, Piece>> pawnsPromotionDisposition{
 				{ 53, Piece::whitePawn } ,{ 9, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation2{ pawnsDisposition };
-			Move promotion = generatePawnMoves(boardRepresentation2, 53, Piece::whiteQueen)[0];
+			Move promotion = generatePawnPromotionMoves(boardRepresentation2, 53, Piece::whiteQueen)[0];
 			Assert::IsTrue(promotion.to == 61 && promotion.promotion == Piece::whiteQueen);
 			boardRepresentation2.isWhiteTurn = false; //Black turn
-			promotion = generatePawnMoves(boardRepresentation2, 9, Piece::blackKnight)[0];
+			promotion = generatePawnPromotionMoves(boardRepresentation2, 9, Piece::blackKnight)[0];
 			Assert::IsTrue(promotion.to == 1 && promotion.promotion == Piece::blackKnight);
 
 			/*Test Pawn Capture*/
@@ -296,21 +304,21 @@ namespace UnitTests
 
 			/*Test En Passant*/
 			BoardRepresentation initialBoardRepresentation2{};
-			initialBoardRepresentation2.move(Move{15,31});
-			initialBoardRepresentation2.move(Move{ 48,32 });
-			initialBoardRepresentation2.move(Move{ 31,39 });
-			initialBoardRepresentation2.move(Move{ 54,38 });
+			initialBoardRepresentation2.makeMove(Move{15,31});
+			initialBoardRepresentation2.makeMove(Move{ 48,32 });
+			initialBoardRepresentation2.makeMove(Move{ 31,39 });
+			initialBoardRepresentation2.makeMove(Move{ 54,38 });
 			pawnMoves = generatePawnMoves(initialBoardRepresentation2, 39); //First Possible En passant
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::IsTrue(pawnMoves[1].from == 39 && pawnMoves[1].to == 46);
 			//Prepare black pieces so that two of theyre pawn will be able to do an En passant move
 			initialBoardRepresentation2.isWhiteTurn = false;
-			initialBoardRepresentation2.move(Move{ 32,24 });
+			initialBoardRepresentation2.makeMove(Move{ 32,24 });
 			initialBoardRepresentation2.isWhiteTurn = false;
-			initialBoardRepresentation2.move(Move{ 50,34 });
+			initialBoardRepresentation2.makeMove(Move{ 50,34 });
 			initialBoardRepresentation2.isWhiteTurn = false;
-			initialBoardRepresentation2.move(Move{ 34,26 });
-			initialBoardRepresentation2.move(Move{ 9,25 });
+			initialBoardRepresentation2.makeMove(Move{ 34,26 });
+			initialBoardRepresentation2.makeMove(Move{ 9,25 });
 			//Black Pawns at position 24 and 26 should be able to capture en passant the white pawn at position 25
 			auto firstPawnMoves = generatePawnMoves(initialBoardRepresentation2, 24);
 			auto secondPawnMoves = generatePawnMoves(initialBoardRepresentation2, 26);
@@ -325,13 +333,13 @@ namespace UnitTests
 			//After one move, the white should be able to take out their bishop
 			BoardRepresentation initialBoardRep{};
 			//Open both white pawns to let the white bishops pass
-			initialBoardRep.move(Move{ 12,28 });
-			initialBoardRep.move(Move{ 51,43 });
-			initialBoardRep.move(Move{ 11,27 });
-			initialBoardRep.move(Move{ 43,35 }); 
-			auto moves = generateBishopMoves(initialBoardRep, 2); //left white bisho
+			initialBoardRep.makeMove(Move{ 12,28 });
+			initialBoardRep.makeMove(Move{ 51,43 });
+			initialBoardRep.makeMove(Move{ 11,27 });
+			initialBoardRep.makeMove(Move{ 43,35 }); 
+			auto moves = generateBishopMoves(initialBoardRep, 2, false); //left white bisho
 			Assert::AreEqual(5, (int)moves.size());
-			moves = generateBishopMoves(initialBoardRep, 5); //right white bishop
+			moves = generateBishopMoves(initialBoardRep, 5, false); //right white bishop
 			Assert::AreEqual(5, (int)moves.size());
 
 		}
@@ -354,34 +362,72 @@ namespace UnitTests
 
 		TEST_METHOD(Perft)
 		{
-			long long nbrNodes = perft(2, BoardRepresentation{});
+			long long nbrNodes = perftParralel(2, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 400);
-			nbrNodes = perft(3, BoardRepresentation{});
+			nbrNodes = perftParralel(3, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 8902);
 			//Uncomment for deepest test (takes times)
-			/*long long nbrNodes = perft(4, BoardRepresentation{});
+			/*nbrNodes = perftParralel(4, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 197281);*/
-			/*long long nbrNodes = perft(5, BoardRepresentation{});
+			/*nbrNodes = perftParralel(5, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 4865609);*/
 		}
 
 		private:
-			//It would it faster with a BoardRepresentation.unmakeMove function
-			//For now, we copy the board after each move for simplicity
 			long long perft(int depth, BoardRepresentation& boardRepresentation)
 			{
 				long long nbrNodes = 0;
 				if (depth == 0) return 1;
-				
+
 				std::vector<Move> moves = generateMoves(boardRepresentation);
 				for (auto& currentMove : moves) {
-					boardRepresentation.move(currentMove);
+					boardRepresentation.makeMove(currentMove);
 					nbrNodes += perft(depth - 1, boardRepresentation);
 					boardRepresentation.unmakeMove(currentMove);
 				}
 
+
 				return nbrNodes;
 			}
+
+			long long perftParralel(int depth, BoardRepresentation& boardRepresentation)
+			{
+				std::atomic<long long> nbrNodes = 0;
+				std::mutex m;
+				unsigned int nbrCore = std::thread::hardware_concurrency();
+				std::vector<Move> moves = generateMoves(boardRepresentation);
+				int nbrSubTreesPerThread = moves.size() / nbrCore;
+
+				std::vector<std::thread> threads;
+				for (int indexThread = 0; indexThread < nbrCore; ++indexThread)
+				{
+					threads.push_back(std::thread{ [&, indexThread]()
+						{
+							for (int indexSubtree = indexThread * nbrSubTreesPerThread;
+								indexSubtree < (indexThread +1) * nbrSubTreesPerThread;
+								++indexSubtree)
+							{
+								auto moveToMake = moves[indexSubtree];
+								m.lock();
+								boardRepresentation.makeMove(moveToMake);
+								BoardRepresentation copyBoard{ boardRepresentation };
+								boardRepresentation.unmakeMove(moveToMake);
+								m.unlock();
+
+								nbrNodes += perft(depth-1, copyBoard);
+							}
+						} 
+					});
+				}
+
+				for (auto& t : threads)
+					t.join();
+
+				return nbrNodes;
+			}
+
+			
+
 	};
 
 	

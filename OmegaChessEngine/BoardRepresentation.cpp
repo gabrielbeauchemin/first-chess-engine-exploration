@@ -24,7 +24,6 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 		return tokens;
 	};
 
-	
 	std::vector<std::string> fenSplitted = split(fen, ' ');
 
 	//Fen Notation has 6 parts:
@@ -32,11 +31,11 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 	// 1)Pieces Position
 	//rook(tour), knight(cavalier), bishop(fou), queen(dame), king(roi) et pawn(pion).
 	static std::map<int, Piece> charToPiece{ {'r', Piece::whiteRook},{'n', Piece::whiteKnight },{ 'b', Piece::whiteBishop },{ 'q', Piece::whiteQueen },{ 'k', Piece::whiteKing },{ 'p', Piece::whitePawn },{ 'R', Piece::blackRook },{ 'N', Piece::blackKnight },{ 'B', Piece::blackBishop },{ 'Q', Piece::blackQueen },{ 'K', Piece::blackKing },{ 'P', Piece::blackPawn } };
-	int indexBoard = 0;
+	int indexBoard = 63;
 	std::vector<std::string> rowPieces = split(fenSplitted[0], '/');
 	for (std::string& row : rowPieces)
 	{
-		for (int indexCase = 0; indexCase < 8; )
+		for (int indexCase = 0; indexCase < row.size(); )
 		{
 			char currentCase = row[indexCase];
 			//Number between 1 to 8 indicated the number of empty cases
@@ -47,15 +46,15 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 				for (int temp = 0; temp < nbrEmtyCases; ++temp)
 				{
 					this->board[indexBoard] = Piece::none;
-					++indexBoard;
-					++indexCase;
+					--indexBoard;
 				}
+				++indexCase;
 			}
 			else
 			{
 				Piece currentPiece = charToPiece.find(currentCase)->second;
 				this->board[indexBoard] = currentPiece;
-				++indexBoard;
+				--indexBoard;
 				++indexCase;
 			}
 		}
@@ -75,6 +74,11 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 	}
 	else
 	{
+		this->canWhiteKingCastle = false;
+		this->canWhiteQueenCastle = false;
+		this->canBlackKingCastle = false;
+		this->canBlackQueenCastle = false;
+
 		if (fenSplitted[2].find('K') != std::string::npos)
 			this->canWhiteKingCastle = true;
 		if (fenSplitted[2].find('Q') != std::string::npos)

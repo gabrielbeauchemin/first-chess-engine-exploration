@@ -152,24 +152,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoardRepresentationTest.cpp" />
+    <ClCompile Include="EvaluationTest.cpp" />
     <ClCompile Include="MoveGenerationTest.cpp" />
+    <ClCompile Include="SearchTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="NotationTest.cpp" />
+    <ClCompile Include="MoveTest.cpp" />
+    <ClCompile Include="TimerTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OmegaChessEngine\OmegaChessEngine.vcxproj">
       <Project>{cabe83d9-a556-4fa9-9416-50ab0346396e}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UnitTests.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../OmegaChessEngine/Move.h"
-#include "../OmegaChessEngine/InvalidChessCaseException.h"
 #include "string"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -22,12 +21,12 @@ namespace UnitTests
 			Assert::IsTrue(corner3and4.getCoordinateAlgebraicNotation() == "a8h8");
 		}
 
-		TEST_METHOD(GetCoordinateAlgebraicNotationOutBound)
-		{
-			//Outbound position should fail at construction
-			Assert::ExpectException<InvalidChessCaseException>([] { Move corner1and2{ -1, 23 }; });
-			Assert::ExpectException<InvalidChessCaseException>([] { Move corner1and2{ 35, 64 }; });
-		}
+		//TEST_METHOD(GetCoordinateAlgebraicNotationOutBound)
+		//{
+		//	//They shoould assert
+		//	Move corner1and2{ -1, 23 };
+		//	Move corner1and2{ 35, 64 }; 
+		//}
 
 		TEST_METHOD(GetCoordinateAlgebraicNotationRandomCases)
 		{

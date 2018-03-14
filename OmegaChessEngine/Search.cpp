@@ -12,7 +12,7 @@ Search::Search(int msMaxByMove)
 
 Move Search::run(BoardRepresentation b)
 {
-	int currentDepth = 4;
+	int currentDepth = 2;
 	Move bestMoveFound{ -1,-1 };
 	int bestHeuristic =  b.isWhiteTurn ? -1 * Evaluation::biggestEvaluation : Evaluation::biggestEvaluation;
 

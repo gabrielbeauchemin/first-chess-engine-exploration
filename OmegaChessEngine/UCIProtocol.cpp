@@ -74,6 +74,7 @@ void UCIProtocol::receiveReady() {
 
 void UCIProtocol::receiveNewGame() {
 	search.stop();
+	search = Search(this->msMaxByMove );
 
 	// We received a new game command.
 	// Initialize per-game settings here.
@@ -116,21 +117,28 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		// Verify if the move done by Opposite camp is a legal move
 		// And make the move to complete the board representation position
 		std::vector<Move> moves = MoveGeneration::generateMoves(currentPosition);
+		std::cout << "In Position, token" + token << std::endl;
+
 		bool found = false;
 		for (Move& move : moves) {
+			std::cout << "In Position, move " + move.getCoordinateAlgebraicNotation();
+
 			if (move.getCoordinateAlgebraicNotation() == token) {
 				currentPosition.makeMove(move);
 				found = true;
 				break;
 			}
 		}
+		std::cout << std::endl;
 
 		if (!found) {
+			std::cout << "Exception in Position, cant find token " + token  << std::endl;
 			throw std::exception();
 		}
 	}
 
 	// Don't start searching though!
+	std::cout << "In Position: currentPosition: " + currentPosition.toString() << std::endl;
 }
 
 void UCIProtocol::receiveGo(std::istringstream& input) {
@@ -215,7 +223,10 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 		}
 	}
 
-	search.run(currentPosition);
+	std::cout << "Before search.run" << std::endl;
+	std::cout << "currentPosition: " + currentPosition.toString() << std::endl;
+	Move bestMove = this->search.run(currentPosition);
+	sendBestMove(bestMove, Move{ -1,-1 });
 }
 
 void UCIProtocol::receivePonderHit() {
@@ -229,25 +240,26 @@ void UCIProtocol::receiveStop() {
 	search.stop();
 }
 
-//Next are examples how to cout info to the UI
 
-//void UCIProtocol::sendBestMove(int bestMove, int ponderMove) {
-//	std::cout << "bestmove ";
-//
-//	if (bestMove != Move::NOMOVE) {
-//		std::cout << fromMove(bestMove);
-//
-//		if (ponderMove != Move::NOMOVE) {
-//			std::cout << " ponder " << fromMove(ponderMove);
-//		}
-//	}
-//	else {
-//		std::cout << "nomove";
-//	}
-//
-//	std::cout << std::endl;
-//}
-//
+void UCIProtocol::sendBestMove(Move bestMove, Move ponderMove) {
+	std::cout << "bestmove ";
+
+	if (bestMove.from != -1 && bestMove.to != -1) {
+		std::cout << bestMove.getCoordinateAlgebraicNotation();
+
+		if (bestMove.from != -1 && bestMove.to != -1) {
+			std::cout << " ponder " << ponderMove.getCoordinateAlgebraicNotation();
+		}
+	}
+	else {
+		std::cout << "nomove";
+	}
+
+	std::cout << std::endl;
+}
+
+
+//Next are examples how to cout info to the UI
 //void UCIProtocol::sendStatus(
 //	int currentDepth, int currentMaxDepth, uint64_t totalNodes, int currentMove, int currentMoveNumber) {
 //	if (std::chrono::duration_cast<std::chrono::milliseconds>(

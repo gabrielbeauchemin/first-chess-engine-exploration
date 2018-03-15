@@ -1,17 +1,18 @@
 #include "Search.h"
 #include "Evaluation.h"
 #include "MoveGeneration.hpp"
+#include "iostream"
 
-
-
-
+#include <string>
 Search::Search(int msMaxByMove)
 	: timer{msMaxByMove}
 {
 }
 
-Move Search::run(BoardRepresentation b)
+Move Search::run(BoardRepresentation& b)
 {
+	std::cout << "BeginSearch " << std::endl;
+
 	int currentDepth = 2;
 	Move bestMoveFound{ -1,-1 };
 	int bestHeuristic =  b.isWhiteTurn ? -1 * Evaluation::biggestEvaluation : Evaluation::biggestEvaluation;
@@ -19,6 +20,7 @@ Move Search::run(BoardRepresentation b)
 	timer.reset();
 	while (true)
 	{
+		std::cout << "Loop in search " << std::endl;
 		auto stopSearching = [currentDepth,this](BoardRepresentation& b) 
 		{
 			return timer.isTimeOut() || b.getCurrentDepth() >= currentDepth; 
@@ -46,12 +48,15 @@ Move Search::run(BoardRepresentation b)
 		++currentDepth;
 	}
 	
+	assert(bestMoveFound.from != -1 && bestMoveFound.to != -1);
 	return bestMoveFound;
 }
 
 void Search::stop()
 {
-	timer.forceTimeOut();
+	//For nows, search is used in a synchrone way so nothing is necessary
+	//When search will be on a thread: this method will be necessary:
+	//timer.forceTimeOut();
 }
 
 void Search::setTimeMax(int msMaxByMove)

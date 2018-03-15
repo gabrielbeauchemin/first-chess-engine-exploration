@@ -9,7 +9,7 @@ class Search
 {
 public:
 	Search(int msMaxByMove);
-	Move run(BoardRepresentation);
+	Move run(BoardRepresentation&);
 	void stop();
 	void setTimeMax(int msMaxByMove);
 

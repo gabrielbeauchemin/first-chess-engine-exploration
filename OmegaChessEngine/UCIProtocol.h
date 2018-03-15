@@ -15,8 +15,7 @@ public:
 	void run();
 
 	//Next are possible methods to output information to the UI
-	/*void sendBestMove(int bestMove, int ponderMove);
-	void sendStatus(int currentDepth, int currentMaxDepth, uint64_t totalNodes, int currentMove, int currentMoveNumber);
+	/*void sendStatus(int currentDepth, int currentMaxDepth, uint64_t totalNodes, int currentMove, int currentMoveNumber);
 	void sendStatus(bool force, int currentDepth, int currentMaxDepth, uint64_t totalNodes, int currentMove,int currentMoveNumber);
 	void sendMove(RootEntry entry, int currentDepth, int currentMaxDepth, uint64_t totalNodes);
 	static std::string fromMove(int move);*/
@@ -35,6 +34,9 @@ private:
 	void receivePonderHit();
 	void receiveStop();
 	void receiveQuit();
+
+	void sendBestMove(Move bestMove, Move ponderMove);
+
 };
 
 

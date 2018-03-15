@@ -1,5 +1,6 @@
 #include "MinMax.h"
 #include "Evaluation.h"
+#include <iostream>
 
 MinMax::MinMax()
 {
@@ -14,8 +15,12 @@ MinMax::MinMax(std::function<int(BoardRepresentation)> getHeuristic, std::functi
 
 std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin)
 {
+	//std::cout << "In Max" << std::endl;
 	if (this->stopSearching(boardRepresentation))
+	{
+		//std::cout << "In max stop condition" << std::endl;
 		return std::pair<int, Move>(this->getHeuristic(boardRepresentation), Move{ -1, -1 });
+	}
 
 	//Black wants the biggest negative score and white want the biggest positive score
 	//Max player want the best move depending of its camp
@@ -24,6 +29,7 @@ std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, 
 	std::vector<Move> possibleMoves = this->generateLegalMoves(boardRepresentation);
 	for (Move& m : possibleMoves)
 	{
+		//std::cout << "In max loop" << std::endl;
 		boardRepresentation.makeMove(m);
 		int score = minValue(boardRepresentation, makesWhiteWin);
 		boardRepresentation.unmakeMove(m);
@@ -53,14 +59,19 @@ std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, 
 
 int MinMax::minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin)
 {
+	//std::cout << "In Min" << std::endl;
 	if (this->stopSearching(boardRepresentation))
+	{
+		//std::cout << "In Min Stop Condition" << std::endl;
 		return this->getHeuristic(boardRepresentation);
+	}
 	//Black wants the biggest negative score and white want the biggest positive score
 	//Min player want the best move depending of its camp
 	int v = makesWhiteWin ? Evaluation::biggestEvaluation : -1 *Evaluation::biggestEvaluation;
 	std::vector<Move> possibleMoves = this->generateLegalMoves(boardRepresentation);
 	for (Move& m : possibleMoves)
 	{
+		//std::cout << "In Min loop" << std::endl;
 		boardRepresentation.makeMove(m);
 		int score = maxValue(boardRepresentation, makesWhiteWin).first;
 		boardRepresentation.unmakeMove(m);
@@ -86,6 +97,7 @@ int MinMax::minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWi
 
 std::pair<int,Move> MinMax::run(BoardRepresentation boardRepresentation)
 {
+	//std::cout << "In Minmax" << std::endl;
 	bool makesWhiteWin = boardRepresentation.isWhiteTurn;
 	return maxValue(boardRepresentation, makesWhiteWin);
 }

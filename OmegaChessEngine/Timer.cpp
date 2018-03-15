@@ -21,7 +21,8 @@ bool Timer::isTimeOut()
 {
 	if (this->isForcedTimeOut == true) return true;
 	end = std::chrono::system_clock::now();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > msBeforeTimeout;
+	int msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	return  msPassed > msBeforeTimeout;
 }
 
 

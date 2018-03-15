@@ -4,6 +4,7 @@
 #include "../OmegaChessEngine/Piece.h"
 #include "../OmegaChessEngine/Piece.cpp"
 #include "../OmegaChessEngine/BoardRepresentation.h"
+#define NDEBUG 
 #include <assert.h>
 #include <thread>
 #include <atomic>
@@ -358,6 +359,13 @@ namespace UnitTests
 				{ 4, Piece::whiteKing } ,{ 8, Piece::blackRook },{ 59, Piece::blackRook },{ 61, Piece::blackRook } };
 			BoardRepresentation boardRepresentation{ kingCheckMated };
 			Assert::IsTrue(isKingStealMate(boardRepresentation, 4));
+		}
+
+		TEST_METHOD(MovesUncheckingKing)
+		{
+			BoardRepresentation boardRepresentation{ "r1bqkbnr/pppppppp/8/8/8/8/PPnPPPPP/RNBQKBNR w KQkq - 0 1" };
+			auto moves = MoveGeneration::generateMoves(boardRepresentation);
+			Assert::AreEqual(1, (int)moves.size() );
 		}
 
 		TEST_METHOD(Perft)

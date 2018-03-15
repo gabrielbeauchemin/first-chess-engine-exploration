@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include "Piece.h"
+#define NDEBUG 
 #include <assert.h>
 
 /* Representation of a chess move that a piece have from

@@ -28,8 +28,8 @@ namespace UnitTests
 
 		TEST_METHOD(EnginePlayAgainstItself)
 		{
-			const int msMaxByMove = 1000;
-			const int nbMoves = 10;
+			const int msMaxByMove = 10000;
+			const int nbMoves = 50;
 			BoardRepresentation boardRepresentation{};
 			std::string allPositions = "";
 
@@ -39,8 +39,38 @@ namespace UnitTests
 				Move m = search.run(boardRepresentation);
 				boardRepresentation.makeMove(m);
 				allPositions += boardRepresentation.toString(); + "\r\n";
+
+				int kingIndex;
+				for (int i = 0 ;i < 64; ++i)
+				{
+					if (isPieceKing(boardRepresentation.board[i]) &&
+						isPieceWhite(boardRepresentation.board[i]) == boardRepresentation.isWhiteTurn)
+					{
+						kingIndex = i;
+					}
+				}
+					
+				if (MoveGeneration::isKingCheckmate(boardRepresentation, kingIndex))
+					break;
 			}
 			
+		}
+
+		TEST_METHOD(PlayGameAgainstEngine)
+		{
+			std::vector<Move> moves{Move{12,28}, Move{6,21}, Move{14,22}, Move{5,14}};
+
+			BoardRepresentation boardRepresentation{};
+			const int msMaxByMove = 5000;
+			for (Move& whiteMove : moves)
+			{
+				std::string currentBoard = boardRepresentation.toString();
+				boardRepresentation.makeMove(whiteMove);
+				Search search{ msMaxByMove };
+				Move blackMove = search.run(boardRepresentation);
+				boardRepresentation.makeMove(blackMove);
+			}
+
 		}
 
 	};

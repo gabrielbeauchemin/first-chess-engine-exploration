@@ -1,7 +1,9 @@
 #include "MoveGeneration.hpp"
 #include "NotImplementedException.h"
 #include <algorithm>
+#define NDEBUG 
 #include <assert.h>
+#include <string>
 
 namespace MoveGeneration
 {
@@ -86,7 +88,8 @@ namespace MoveGeneration
 					if (isPieceKnight(currentPiece) || isPiecePawn(currentPiece))
 						continue;
 				}
-				else if (isPiecePawn(currentPiece))
+
+				if (isPiecePawn(currentPiece))
 				{
 					auto newMoves = generatePawnMoves(boardRepresentation, caseIndex);
 					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
@@ -588,15 +591,123 @@ namespace MoveGeneration
 
 	}
 
+	int nbrTimesPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase)
+	{
+		int nbrTimesPieceAttacked = 0;
+		//Remove the piece for the evaluation, as it can block potential attack
+		//Put it back at the end
+		Piece piecePotentiallyAttacked = boardRepresentation.board[pieceCase];
+		boardRepresentation.board[pieceCase] = Piece::none;
+
+		//Each iteration, move the piece in diagonal
+		//If he meets bishop or queen or pawn from the opposite camp, hes in check
+		for (const int& currentOffset : bishopOffset /*Diagonal Moves*/)
+		{
+			int currentCaseIndex = pieceCase;
+
+			//Generate all possible moves in the direction the current diagonal
+			bool firstOffset = true;
+			while (true)
+			{
+				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+				if (currentCaseIndex == -1) break; //Outside of the board
+
+	            //piece meets a piece
+				auto currentCase = boardRepresentation.board[currentCaseIndex];
+				if (!isPieceNone(currentCase))
+				{
+					//piece meets pawn after only one offset
+					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
+						&& isPiecePawn(currentCase) && firstOffset)
+					{
+						nbrTimesPieceAttacked++;
+					}
+					//piece meets a bishop or queen from opposite camp, hes in check
+					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn &&
+						(isPieceQueen(currentCase) || isPieceBishop(currentCase)))
+					{
+						nbrTimesPieceAttacked++;
+					}
+					//He meets a piece of its own camp or a piece from the opposite camp
+					//That cant put him in check. Look into another direction
+					else
+					{
+						break;
+					}
+				}
+
+				//The case is empty, continue searching in this direction
+				firstOffset = false;
+			}
+		}
+
+		//Each iteration, move the piece in lines
+		//If he meets rook or queen from the opposite camp, hes in check
+		for (const int& currentOffset : rookOffset /*Moves in line*/)
+		{
+			int currentCaseIndex = pieceCase;
+			//Generate all possible moves in the direction the current offset
+			while (true)
+			{
+				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+				if (currentCaseIndex == -1) break; //Outside of the board
+
+												   //piece meets a piece
+				auto currentCase = boardRepresentation.board[currentCaseIndex];
+				if (!isPieceNone(currentCase))
+				{
+					//piece meets a rook or queen from opposite camp, hes in check
+					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
+						&& (isPieceQueen(currentCase) || isPieceRook(currentCase)))
+					{
+						nbrTimesPieceAttacked++;
+					}
+					//He meets a piece of its own camp or a piece from the opposite camp
+					//That cant put him in check. Look into another direction
+					else
+					{
+						break;
+					}
+				}
+
+				//The case is empty, nothing to do, continue searching in this direction
+			}
+		}
+
+		//Move the piece like a knight: 
+		//If he meets a knight from the opposite camp, hes in check
+		for (const int& currentOffset : knightOffset)
+		{
+			int currentCaseIndex = pieceCase;
+			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+
+			if (currentCaseIndex == -1) continue; //Outside of the board
+
+			auto currentCase = boardRepresentation.board[currentCaseIndex];
+			//piece meets a rook or queen from opposite camp, hes in check
+			if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
+				&& isPieceKnight(currentCase))
+			{
+				nbrTimesPieceAttacked++;
+			}
+		}
+
+		//piece didnt find any pieces of the opposite camp that are attacking him
+		boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+		return nbrTimesPieceAttacked;
+	}
+
 	bool isPieceInAbsolutePin(BoardRepresentation& boardRepresentation, int pieceCase, int kingCase)
 	{
 		//If the piece is in absolute pin, that means that if
-		//It is gone, the king is cheked
+		//It is gone, the king one more time (the king may already be in check)
+		int nbrAttacksOnKing = nbrTimesPieceAttacked(boardRepresentation, kingCase);
 		Piece tmp = boardRepresentation.board[pieceCase];
 		boardRepresentation.board[pieceCase] = Piece::none;
-		bool isPieceBasolutePin = isPieceAttacked(boardRepresentation, kingCase);
+		int nbrAttacksOnKingPieceOff = nbrTimesPieceAttacked(boardRepresentation, kingCase);
 		boardRepresentation.board[pieceCase] = tmp;
-		return isPieceBasolutePin;
+		bool isPieceAsolutePin = nbrAttacksOnKing < nbrAttacksOnKingPieceOff;
+		return isPieceAsolutePin;
 	}
 
 	bool isPawnMovePromotion(const BoardRepresentation& boardRepresentation, int pawnCaseBeforeMove)
@@ -613,15 +724,18 @@ namespace MoveGeneration
 
 	void filterMovesUncheckingKing(BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase)
 	{
-		std::remove_if(movesToFilter.begin(), movesToFilter.end(), 
-			[&](const Move & move)
+		movesToFilter.erase(
+			std::remove_if(movesToFilter.begin(), movesToFilter.end(),
+				[&](const Move & move)
 		{
 			boardRepresentation.makeMove(move);
+			boardRepresentation.isWhiteTurn = !boardRepresentation.isWhiteTurn; //Necessary so isPieceAttacked evaluate for the good camp
 			bool isKingInCheck = isPieceAttacked(boardRepresentation, kingCase);
+			boardRepresentation.isWhiteTurn = !boardRepresentation.isWhiteTurn;
 			boardRepresentation.unmakeMove(move);
 			return isKingInCheck;
-		});
-		
+		})
+			, movesToFilter.end());
 	}
 
 	bool isKingCheckmate(BoardRepresentation & boardRepresentation, int kingCase)
@@ -646,7 +760,7 @@ namespace MoveGeneration
 
 		//If the Piece Pinned is a bishop, rook or queen, search the King
 		//and return the offset in the opposite direction of the king (the piece still protect the king)
-		for (const int& currentOffset : knightOffset)
+		for (const int& currentOffset : possibleOffsets)
 		{
 			int currentCaseIndex = pinnedPieceCase;
 			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
@@ -661,7 +775,8 @@ namespace MoveGeneration
 				return pinnedPieceLegalOffset;
 			}
 		}
-		//King not found: not normal: that means that th piece is not really pinned
+		//King not found: not normal: that means that the piece is not really pinned
+		std::cout << "Piece should not be considered absolutly pinned:" + std::to_string(static_cast<int>(boardRepresentation.board[pinnedPieceCase])) << std::endl;
 		assert(false);
 		return std::vector<int>();
 	}

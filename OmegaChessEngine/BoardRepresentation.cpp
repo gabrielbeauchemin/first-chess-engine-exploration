@@ -1,5 +1,6 @@
 #include "BoardRepresentation.h"
 #include "IlegalMoveException.h"
+#define NDEBUG 
 #include <assert.h>
 #include <iostream>
 #include <string>
@@ -30,11 +31,12 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 
 	// 1)Pieces Position
 	//rook(tour), knight(cavalier), bishop(fou), queen(dame), king(roi) et pawn(pion).
-	static std::map<int, Piece> charToPiece{ {'r', Piece::whiteRook},{'n', Piece::whiteKnight },{ 'b', Piece::whiteBishop },{ 'q', Piece::whiteQueen },{ 'k', Piece::whiteKing },{ 'p', Piece::whitePawn },{ 'R', Piece::blackRook },{ 'N', Piece::blackKnight },{ 'B', Piece::blackBishop },{ 'Q', Piece::blackQueen },{ 'K', Piece::blackKing },{ 'P', Piece::blackPawn } };
-	int indexBoard = 63;
+	static std::map<int, Piece> charToPiece{ {'r', Piece::blackRook},{'n', Piece::blackKnight },{ 'b', Piece::blackBishop },{ 'q', Piece::blackQueen },{ 'k', Piece::blackKing },{ 'p', Piece::blackPawn },{ 'R', Piece::whiteRook },{ 'N', Piece::whiteKnight },{ 'B', Piece::whiteBishop },{ 'Q', Piece::whiteQueen },{ 'K', Piece::whiteKing },{ 'P', Piece::whitePawn } };
 	std::vector<std::string> rowPieces = split(fenSplitted[0], '/');
-	for (std::string& row : rowPieces)
+	for(int indexRow =0; indexRow < 8; ++indexRow)
 	{
+		std::string row = rowPieces[indexRow];
+		int indexBoard = (7 - indexRow) * 8; //Begin by the row at the end
 		for (int indexCase = 0; indexCase < row.size(); )
 		{
 			char currentCase = row[indexCase];
@@ -46,7 +48,7 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 				for (int temp = 0; temp < nbrEmtyCases; ++temp)
 				{
 					this->board[indexBoard] = Piece::none;
-					--indexBoard;
+					++indexBoard;
 				}
 				++indexCase;
 			}
@@ -54,7 +56,7 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 			{
 				Piece currentPiece = charToPiece.find(currentCase)->second;
 				this->board[indexBoard] = currentPiece;
-				--indexBoard;
+				++indexBoard;
 				++indexCase;
 			}
 		}
@@ -198,8 +200,9 @@ bool BoardRepresentation::operator==(const BoardRepresentation & other)
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::makeMove(Move move)
 {  
-	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
+	auto t = toString();
 	assert(!isPieceNone(this->board[move.from]));
+	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
 	assert(isPieceNone(this->board[move.to]) ||
 		(isPieceWhite(this->board[move.to]) != this->isWhiteTurn));
 	
@@ -334,32 +337,32 @@ void BoardRepresentation::makeMove(Move move)
 
 void BoardRepresentation::unmakeMove(Move move)
 {
-	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
 	assert(!isPieceNone(board[move.to]));
+	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
 		
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.to, move.from); //Swap King
 		bool isKingSideCastling = (move.from - move.to < 0) ? true : false;
 		int initialRookPos;
-		if (this->isWhiteTurn && isKingSideCastling) initialRookPos = 7;
-		else if (this->isWhiteTurn && !isKingSideCastling) initialRookPos = 0;
-		else if (!this->isWhiteTurn && isKingSideCastling) initialRookPos = 63;
-		else if (!this->isWhiteTurn && !isKingSideCastling) initialRookPos = 56;
+		if (this->isWhiteTurn && isKingSideCastling) initialRookPos = 63;
+		else if (this->isWhiteTurn && !isKingSideCastling) initialRookPos = 56;
+		else if (!this->isWhiteTurn && isKingSideCastling) initialRookPos = 7;
+		else if (!this->isWhiteTurn && !isKingSideCastling) initialRookPos = 0;
 		int translationRook = (isKingSideCastling) ? -2 : 3;
 		swap<Piece>(board, initialRookPos + translationRook, initialRookPos); //Swap Rook
 
 		if (isWhiteTurn)
 		{
-			this->canWhiteKingCastle = true;
-			this->canWhiteQueenCastle = true;
+			this->canBlackKingCastle = true;
+			this->canBlackQueenCastle = true;
 			this->justLooseRightKingCastle = false;
 			this->justLooseRightQueenCastle = false;
 		}
 		else
 		{
-			this->canBlackKingCastle = true;
-			this->canBlackQueenCastle = true;
+			this->canWhiteKingCastle = true;
+			this->canWhiteQueenCastle = true;
 			this->justLooseRightKingCastle = false;
 			this->justLooseRightQueenCastle = false;
 		}
@@ -442,7 +445,9 @@ void BoardRepresentation::unmakeMove(Move move)
 		auto lastCapture = this->lastCaptures.find(currentDepth - 1);
 		if (lastCaptures.end() != lastCapture)
 		{
-			assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
+			std::cout << "piece Captured " << std::to_string(static_cast<int>(lastCapture->second)) << " currentDepth:" << std::to_string(currentDepth) << "isWhiteTurn:" << isWhiteTurn << std::endl;
+			std::cout << toString() << std::endl;
+			//assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
 			board[move.to] = lastCapture->second;
 			this->lastCaptures.erase(lastCapture);
 		}
@@ -564,3 +569,4 @@ void BoardRepresentation::swap(T array[], int i, int j)
 	array[i] = array[j];
 	array[j] = temp;
 }
+

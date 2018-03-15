@@ -16,6 +16,7 @@ namespace MoveGeneration
 	std::vector<Move> generatePawnPromotionMoves(const BoardRepresentation& boardRepresentation, int pawnCase, Piece promotion);
 
 	bool isPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase);
+	int nbrTimesPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase);
 	bool isPieceInAbsolutePin(BoardRepresentation& boardRepresentation, int pieceCase, int kingCase);
 	bool isPawnMovePromotion(const BoardRepresentation& boardRepresentation, int pawnCase);
 	void filterMovesUncheckingKing(BoardRepresentation& boardRepresentation, std::vector<Move>& movesToFilter, int kingCase);

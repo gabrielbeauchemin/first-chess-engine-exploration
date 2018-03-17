@@ -191,7 +191,7 @@ const std::unordered_map<Piece, std::vector<int>> Evaluation::positionsValue =
 	{ Piece::blackQueen, blackQueenPositionValue },{ Piece::whiteQueen, whiteQueenPositionValue }
 };
 
-const int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
+int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 {
 	int score = 0;
 	std::vector<int> kingsIndex;

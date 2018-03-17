@@ -41,7 +41,7 @@ private:
 
 public :
 	static const int biggestEvaluation;
-	static const int evaluate(BoardRepresentation& boardRepresentation);
+	static int evaluate(BoardRepresentation& boardRepresentation);
 
 };
 

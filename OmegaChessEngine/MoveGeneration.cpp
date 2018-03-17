@@ -1,7 +1,7 @@
 #include "MoveGeneration.hpp"
 #include "NotImplementedException.h"
 #include <algorithm>
-#define NDEBUG 
+//#define NDEBUG 
 #include <assert.h>
 #include <string>
 
@@ -776,7 +776,6 @@ namespace MoveGeneration
 			}
 		}
 		//King not found: not normal: that means that the piece is not really pinned
-		std::cout << "Piece should not be considered absolutly pinned:" + std::to_string(static_cast<int>(boardRepresentation.board[pinnedPieceCase])) << std::endl;
 		assert(false);
 		return std::vector<int>();
 	}

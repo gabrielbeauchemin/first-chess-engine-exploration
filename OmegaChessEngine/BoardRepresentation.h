@@ -32,6 +32,7 @@ public:
 	void unmakeMove(Move move);
 	std::string toString();
 	int getCurrentDepth();
+	void setCurrentDepth(int depth);
 
 private: 
 	/*Help for unmakeMove*/

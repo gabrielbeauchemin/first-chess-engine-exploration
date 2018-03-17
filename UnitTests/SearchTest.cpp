@@ -28,8 +28,8 @@ namespace UnitTests
 
 		TEST_METHOD(EnginePlayAgainstItself)
 		{
-			const int msMaxByMove = 10000;
-			const int nbMoves = 50;
+			const int msMaxByMove = 1000;
+			const int nbMoves = 10;
 			BoardRepresentation boardRepresentation{};
 			std::string allPositions = "";
 
@@ -71,6 +71,24 @@ namespace UnitTests
 				boardRepresentation.makeMove(blackMove);
 			}
 
+		}
+
+		//Test different positions that were failing in arena
+		TEST_METHOD(SearchSpecialPositions)
+		{
+			Search search{ 5000 };
+
+			//Board before this position: 4R3/2R2pp1/7p/3B1k2/8/8/1PP4P/1N4K1 w - - 1 24 then rook eat the pawn at his right
+			BoardRepresentation boardRepresentation{ "4R3/5Rp1/7p/3B1k2/8/8/1PP4P/1N4K1 b - - 0 24" };
+			std::string m = search.run(boardRepresentation).getCoordinateAlgebraicNotation();
+
+			//Board before this position: r1bq1rk1/ppp2ppp/8/3pP3/8/P2Q1N2/2P2PPP/R1B1KB1R w KQ - 1 11  then bishop goes to f4
+			BoardRepresentation boardRepresentation2{ "r1bq1rk1/ppp2ppp/8/3pP3/5B2/P2Q1N2/2P2PPP/R3KB1R b KQ - 2 11" };
+			m = search.run(boardRepresentation2).getCoordinateAlgebraicNotation();;
+
+			//Board before this position: r1bq1rk1/ppp2ppp/8/3pP3/8/P2Q1N2/2P2PPP/R1B1KB1R w KQ - 1 11  then bishop goes to f4
+			BoardRepresentation boardRepresentation3{ "r2qkb1r/ppp2ppp/2n1b3/3ppP2/8/6N1/PPPPQ1PP/R1B1KBNR b KQkq - 0 7" };
+			m = search.run(boardRepresentation3).getCoordinateAlgebraicNotation();
 		}
 
 	};

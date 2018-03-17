@@ -11,8 +11,6 @@ Search::Search(int msMaxByMove)
 
 Move Search::run(BoardRepresentation& b)
 {
-	std::cout << "BeginSearch " << std::endl;
-
 	int currentDepth = 2;
 	Move bestMoveFound{ -1,-1 };
 	int bestHeuristic =  b.isWhiteTurn ? -1 * Evaluation::biggestEvaluation : Evaluation::biggestEvaluation;
@@ -20,7 +18,6 @@ Move Search::run(BoardRepresentation& b)
 	timer.reset();
 	while (true)
 	{
-		std::cout << "Loop in search " << std::endl;
 		auto stopSearching = [currentDepth,this](BoardRepresentation& b) 
 		{
 			return timer.isTimeOut() || b.getCurrentDepth() >= currentDepth; 

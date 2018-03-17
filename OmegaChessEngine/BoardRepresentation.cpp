@@ -1,6 +1,6 @@
 #include "BoardRepresentation.h"
 #include "IlegalMoveException.h"
-#define NDEBUG 
+//#define NDEBUG 
 #include <assert.h>
 #include <iostream>
 #include <string>
@@ -114,7 +114,8 @@ BoardRepresentation::BoardRepresentation()
 	canBlackQueenCastle{ true },
 	canWhiteKingCastle{ true },
 	canWhiteQueenCastle{ true },
-	reversibleMovesInRow{ 0 }
+	reversibleMovesInRow{ 0 },
+	currentDepth{0}
 {
 	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 
@@ -445,9 +446,7 @@ void BoardRepresentation::unmakeMove(Move move)
 		auto lastCapture = this->lastCaptures.find(currentDepth - 1);
 		if (lastCaptures.end() != lastCapture)
 		{
-			std::cout << "piece Captured " << std::to_string(static_cast<int>(lastCapture->second)) << " currentDepth:" << std::to_string(currentDepth) << "isWhiteTurn:" << isWhiteTurn << std::endl;
-			std::cout << toString() << std::endl;
-			//assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
+			assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
 			board[move.to] = lastCapture->second;
 			this->lastCaptures.erase(lastCapture);
 		}
@@ -514,6 +513,11 @@ std::string BoardRepresentation::toString()
 int BoardRepresentation::getCurrentDepth()
 {
 	return this->currentDepth;
+}
+
+void BoardRepresentation::setCurrentDepth(int depth)
+{
+	this->currentDepth = depth;
 }
 
 bool BoardRepresentation::isMoveCastling(Move move)

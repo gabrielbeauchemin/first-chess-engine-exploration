@@ -117,11 +117,9 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		// Verify if the move done by Opposite camp is a legal move
 		// And make the move to complete the board representation position
 		std::vector<Move> moves = MoveGeneration::generateMoves(currentPosition);
-		std::cout << "In Position, token" + token << std::endl;
 
 		bool found = false;
 		for (Move& move : moves) {
-			std::cout << "In Position, move " + move.getCoordinateAlgebraicNotation();
 
 			if (move.getCoordinateAlgebraicNotation() == token) {
 				currentPosition.makeMove(move);
@@ -132,13 +130,12 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		std::cout << std::endl;
 
 		if (!found) {
-			std::cout << "Exception in Position, cant find token " + token  << std::endl;
 			throw std::exception();
 		}
 	}
 
+	currentPosition.setCurrentDepth(0);
 	// Don't start searching though!
-	std::cout << "In Position: currentPosition: " + currentPosition.toString() << std::endl;
 }
 
 void UCIProtocol::receiveGo(std::istringstream& input) {
@@ -223,8 +220,6 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 		}
 	}
 
-	std::cout << "Before search.run" << std::endl;
-	std::cout << "currentPosition: " + currentPosition.toString() << std::endl;
 	Move bestMove = this->search.run(currentPosition);
 	sendBestMove(bestMove, Move{ -1,-1 });
 }

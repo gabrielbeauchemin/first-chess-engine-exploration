@@ -4,7 +4,7 @@
 #include "../OmegaChessEngine/Piece.h"
 #include "../OmegaChessEngine/Piece.cpp"
 #include "../OmegaChessEngine/BoardRepresentation.h"
-#define NDEBUG 
+//#define NDEBUG 
 #include <assert.h>
 #include <thread>
 #include <atomic>

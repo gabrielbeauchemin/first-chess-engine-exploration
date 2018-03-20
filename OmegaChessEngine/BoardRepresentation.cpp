@@ -536,6 +536,8 @@ bool BoardRepresentation::isMoveCastling(Move move)
 
 bool BoardRepresentation::movesPermitEnPassant(Move lastMove)
 {
+	if (abs(lastMove.from - lastMove.to) != 16) //En passant only if pawn go forward of two cases
+		return false;
 	if (!isPiecePawn(board[lastMove.to]))
 		return false;
 

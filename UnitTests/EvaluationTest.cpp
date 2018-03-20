@@ -17,7 +17,7 @@ namespace UnitTests
 			std::vector<std::pair<int, Piece>> whiteCheckMated
 			{ std::pair<int,Piece> {8, Piece::blackRook }, std::pair<int,Piece> {0, Piece::blackRook }, std::pair<int,Piece> {2, Piece::whiteKing } };
 			BoardRepresentation boardRepresentation{ whiteCheckMated };
-			Assert::AreEqual(Evaluation::biggestEvaluation, Evaluation::evaluate(boardRepresentation));
+			Assert::AreEqual(-1 *Evaluation::biggestEvaluation, Evaluation::evaluate(boardRepresentation));
 		}
 
 		TEST_METHOD(EvalCheckmateBlack)
@@ -26,7 +26,7 @@ namespace UnitTests
 			{ std::pair<int,Piece> {8, Piece::whiteRook }, std::pair<int,Piece> {0, Piece::whiteRook }, std::pair<int,Piece> {2, Piece::blackKing } };
 			BoardRepresentation boardRepresentation{ blackCheckMated };
 			boardRepresentation.isWhiteTurn = false;
-			Assert::AreEqual(Evaluation::biggestEvaluation*-1, Evaluation::evaluate(boardRepresentation));
+			Assert::AreEqual(Evaluation::biggestEvaluation, Evaluation::evaluate(boardRepresentation));
 		}
 
 		TEST_METHOD(EvalStealMateWhite)

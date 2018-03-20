@@ -7,7 +7,6 @@ void printUsage()
 }
 int main(int argc, char* argv[])
 {
-	std::cout << "Patate" << std::endl;
 	if (argc == 1) {
 		UCIProtocol protocol;
 		protocol.run();;

@@ -842,6 +842,7 @@ namespace MoveGeneration
 			return false; 
 		if (!isPieceNone(boardRepresentation.board[move.to]))
 			return false;
+		
 		if (isPieceWhite(boardRepresentation.board[move.from]))
 		{
 			if (move.from / 8 != 4) return false;

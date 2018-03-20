@@ -229,24 +229,24 @@ namespace UnitTests
 		{
 			/* From initial board, pawns can move of one case or two*/
 			BoardRepresentation boardRepresentation{};
-			auto pawnMoves = generatePawnMoves(boardRepresentation, 8);
+			auto pawnMoves = generatePawnMoves(boardRepresentation, 8, false, -1);
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::AreEqual(pawnMoves[0].to, 16);
 			Assert::AreEqual(pawnMoves[1].to, 24);
-			pawnMoves = generatePawnMoves(boardRepresentation, 12);
+			pawnMoves = generatePawnMoves(boardRepresentation, 12, false, -1);
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::AreEqual(pawnMoves[0].to, 20);
 			Assert::AreEqual(pawnMoves[1].to, 28);
 			boardRepresentation.isWhiteTurn = false;
-			pawnMoves = generatePawnMoves(boardRepresentation, 48);
+			pawnMoves = generatePawnMoves(boardRepresentation, 48, false, -1);
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::AreEqual(pawnMoves[0].to, 40);
 			Assert::AreEqual(pawnMoves[1].to, 32);
-			pawnMoves = generatePawnMoves(boardRepresentation, 51);
+			pawnMoves = generatePawnMoves(boardRepresentation, 51, false, -1);
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::AreEqual(pawnMoves[0].to, 43);
 			Assert::AreEqual(pawnMoves[1].to, 35);
-			pawnMoves = generatePawnMoves(boardRepresentation, 55);
+			pawnMoves = generatePawnMoves(boardRepresentation, 55, false, -1);
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::AreEqual(pawnMoves[0].to, 47);
 			Assert::AreEqual(pawnMoves[1].to, 39);
@@ -255,14 +255,14 @@ namespace UnitTests
 			std::vector<std::pair<int, Piece>> pawnsDisposition{
 				{ 16, Piece::whitePawn } ,{ 27, Piece::whitePawn },{ 46, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation1{ pawnsDisposition };
-			pawnMoves = generatePawnMoves(boardRepresentation1, 16);
+			pawnMoves = generatePawnMoves(boardRepresentation1, 16, false, -1);
 			Assert::AreEqual(1, (int)pawnMoves.size());
 			Assert::AreEqual(24, pawnMoves[0].to);
-			pawnMoves = generatePawnMoves(boardRepresentation1, 27);
+			pawnMoves = generatePawnMoves(boardRepresentation1, 27, false, -1);
 			Assert::AreEqual(1, (int)pawnMoves.size());
 			Assert::AreEqual(35, pawnMoves[0].to);
 			boardRepresentation1.isWhiteTurn = false; //Black turn
-			pawnMoves = generatePawnMoves(boardRepresentation1, 46);
+			pawnMoves = generatePawnMoves(boardRepresentation1, 46, false, -1);
 			Assert::AreEqual(1, (int)pawnMoves.size());
 			Assert::AreEqual(38, pawnMoves[0].to);
 
@@ -270,14 +270,14 @@ namespace UnitTests
 			BoardRepresentation initialBoardRepresentation{};
 			initialBoardRepresentation.makeMove(Move{ 12,28 });
 			initialBoardRepresentation.makeMove(Move{ 52,36 }); //Both pawn cant move
-			Assert::AreEqual(0, (int) generatePawnMoves(initialBoardRepresentation, 28).size());
+			Assert::AreEqual(0, (int) generatePawnMoves(initialBoardRepresentation, 28, false, -1).size());
 			initialBoardRepresentation.makeMove(Move{ 8,24 }); // So its black turn and prepare to block another 2 pawns
-			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 36).size());
+			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 36, false, -1).size());
 			initialBoardRepresentation.makeMove(Move{ 48,40 });
 			initialBoardRepresentation.makeMove(Move{ 24,32 }); //After that move, the two pawn on A row are blocked
-			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 40).size());
+			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 40, false, -1).size());
 			initialBoardRepresentation.isWhiteTurn = true;
-			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 32).size());
+			Assert::AreEqual(0, (int)generatePawnMoves(initialBoardRepresentation, 32, false, -1).size());
 
 			/* Test pawn promotion*/
 			std::vector<std::pair<int, Piece>> pawnsPromotionDisposition{
@@ -293,17 +293,17 @@ namespace UnitTests
 			std::vector<std::pair<int, Piece>> pawnsAttack{
 				{ 9, Piece::whitePawn } ,{ 16, Piece::blackPawn },{ 18, Piece::blackPawn } };
 			BoardRepresentation boardRepresentation3{ pawnsAttack };
-			Assert::AreEqual(4, (int)generatePawnMoves(boardRepresentation3, 9).size());
+			Assert::AreEqual(4, (int)generatePawnMoves(boardRepresentation3, 9, false, -1).size());
 			boardRepresentation3.isWhiteTurn = false;
-			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 16).size());
-			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 18).size());
+			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 16, false, -1).size());
+			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation3, 18, false, -1).size());
 			std::vector<std::pair<int, Piece>> pawnsAttack2{
 				{ 43, Piece::blackPawn } ,{ 34, Piece::whitePawn },{ 36, Piece::whitePawn } };
 			BoardRepresentation boardRepresentation4{ pawnsAttack2 };
-			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 34).size());
-			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 36).size());
+			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 34, false, -1).size());
+			Assert::AreEqual(2, (int)generatePawnMoves(boardRepresentation4, 36, false, -1).size());
 			boardRepresentation4.isWhiteTurn = false;
-			Assert::AreEqual(3, (int)generatePawnMoves(boardRepresentation4, 43).size());
+			Assert::AreEqual(3, (int)generatePawnMoves(boardRepresentation4, 43, false, -1).size());
 
 
 			/*Test En Passant*/
@@ -312,7 +312,7 @@ namespace UnitTests
 			initialBoardRepresentation2.makeMove(Move{ 48,32 });
 			initialBoardRepresentation2.makeMove(Move{ 31,39 });
 			initialBoardRepresentation2.makeMove(Move{ 54,38 });
-			pawnMoves = generatePawnMoves(initialBoardRepresentation2, 39); //First Possible En passant
+			pawnMoves = generatePawnMoves(initialBoardRepresentation2, 39, false, -1); //First Possible En passant
 			Assert::AreEqual(2, (int)pawnMoves.size());
 			Assert::IsTrue(pawnMoves[1].from == 39 && pawnMoves[1].to == 46);
 			//Prepare black pieces so that two of theyre pawn will be able to do an En passant move
@@ -324,8 +324,8 @@ namespace UnitTests
 			initialBoardRepresentation2.makeMove(Move{ 34,26 });
 			initialBoardRepresentation2.makeMove(Move{ 9,25 });
 			//Black Pawns at position 24 and 26 should be able to capture en passant the white pawn at position 25
-			auto firstPawnMoves = generatePawnMoves(initialBoardRepresentation2, 24);
-			auto secondPawnMoves = generatePawnMoves(initialBoardRepresentation2, 26);
+			auto firstPawnMoves = generatePawnMoves(initialBoardRepresentation2, 24, false, -1);
+			auto secondPawnMoves = generatePawnMoves(initialBoardRepresentation2, 26, false, -1);
 			Assert::IsTrue(firstPawnMoves.size() == 2);
 			Assert::IsTrue(secondPawnMoves.size() == 2);
 			Assert::IsTrue(firstPawnMoves[1].from == 24 && firstPawnMoves[1].to == 17);
@@ -378,8 +378,8 @@ namespace UnitTests
 			nbrNodes = perftParralel(3, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 8902);
 			//Uncomment for deepest test (takes times)
-			/*nbrNodes = perftParralel(4, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 197281);*/
+			nbrNodes = perftParralel(4, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 197281);
 			/*long long nbrNodes = perftParralel(5, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 4865609);*/
 		}

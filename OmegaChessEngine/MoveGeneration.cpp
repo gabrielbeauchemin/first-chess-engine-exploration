@@ -79,19 +79,19 @@ namespace MoveGeneration
 			{
 				//Pieces that are in absolute pin can move only if it doesnt check the king
 				//Take note of absolute pin to send it to generate moves functions
-				//The exceptions are the pawn and knights, which cant move in any direction without cheking its king
+				//The exceptions are the knights, which cant move in any direction without cheking its king
 				bool isPiecePinned = false;
 				if (!isPieceKing(currentPiece) &&
 					isPieceInAbsolutePin(boardRepresentation, caseIndex, kingIndex))
 				{
 					isPiecePinned = true;
-					if (isPieceKnight(currentPiece) || isPiecePawn(currentPiece))
+					if (isPieceKnight(currentPiece))
 						continue;
 				}
 
 				if (isPiecePawn(currentPiece))
 				{
-					auto newMoves = generatePawnMoves(boardRepresentation, caseIndex);
+					auto newMoves = generatePawnMoves(boardRepresentation, caseIndex, isPiecePinned, kingIndex);
 					if (isKingInCheck) filterMovesUncheckingKing(boardRepresentation, newMoves, kingIndex);
 					moves.insert(moves.end(), newMoves.begin(), newMoves.end());
 				}
@@ -386,10 +386,21 @@ namespace MoveGeneration
 	}
 
 	//Does not include the move pawn for a promotion to be more modular, see function generatePawnPromotion
-	std::vector<Move> generatePawnMoves(const BoardRepresentation& boardRepresentation, int pawnCase)
+	std::vector<Move> generatePawnMoves(BoardRepresentation& boardRepresentation, int pawnCase, bool isPiecePinned, int kingIndex)
 	{
 		std::vector<Move> moves;
 		const int row = 8;
+
+		auto isMoveCheckingKing = [kingIndex, &boardRepresentation](Move m)
+		{
+			if (!isPieceNone(boardRepresentation.board[m.to])) return false;
+			boardRepresentation.makeMove(m);
+			boardRepresentation.isWhiteTurn = !boardRepresentation.isWhiteTurn;
+			bool isKingInCheck = isPieceAttacked(boardRepresentation, kingIndex);
+			boardRepresentation.isWhiteTurn = !boardRepresentation.isWhiteTurn;
+			boardRepresentation.unmakeMove(m);
+			return isKingInCheck;
+		};
 
 		//In case of promotion
 		if (isPawnMovePromotion(boardRepresentation, pawnCase))
@@ -400,8 +411,14 @@ namespace MoveGeneration
 
 			for (auto& promotionType : possiblePromotion)
 			{
-				std::vector<Move> promotionMove = generatePawnPromotionMoves(boardRepresentation, pawnCase, promotionType);
-				moves.insert(moves.end(), promotionMove.begin(), promotionMove.end());
+				std::vector<Move> promotionMoves = generatePawnPromotionMoves(boardRepresentation, pawnCase, promotionType);
+				if (isPiecePinned)
+				{
+					promotionMoves.erase( //Remove all promotion move that are checking the king
+						std::remove_if(promotionMoves.begin(), promotionMoves.end(),
+							[&](const Move & m){return isMoveCheckingKing(m);}), promotionMoves.end() );
+				}
+				moves.insert(moves.end(), promotionMoves.begin(), promotionMoves.end());
 			}
 			return moves;
 		}
@@ -409,7 +426,9 @@ namespace MoveGeneration
 		//Moving forward of one case if the case is empty
 		int step = (boardRepresentation.isWhiteTurn) ? row : -row;
 		bool isNextCaseEmpty = isPieceNone(boardRepresentation.board[pawnCase + step]);
-		if (isNextCaseEmpty)
+		bool isMoveForwardLegal = true;
+		if (isPiecePinned) isMoveForwardLegal = !isMoveCheckingKing(Move{ pawnCase,pawnCase + step });
+		if (isNextCaseEmpty && isMoveForwardLegal)
 			moves.push_back(Move{ pawnCase,pawnCase + step });
 		
 		//Moving forward of two cases is only possible if the pawn is on its initial case
@@ -417,8 +436,9 @@ namespace MoveGeneration
 			                                      : pawnCase / row == 6;
 		if (isOnInitialRow)
 		{
-			if(isNextCaseEmpty && isPieceNone(boardRepresentation.board[pawnCase + step + step]))
-			moves.push_back(Move{ pawnCase,pawnCase + step + step });
+			if(isNextCaseEmpty && isPieceNone(boardRepresentation.board[pawnCase + step + step])
+				&& isMoveForwardLegal)
+			    moves.push_back(Move{ pawnCase,pawnCase + step + step });
 		}
 
 		//Capture a piece
@@ -433,10 +453,12 @@ namespace MoveGeneration
 			//The case is occupied
 			if (!isPieceNone(boardRepresentation.board[currentCaseIndex]))
 			{
+				Move capture{ pawnCase,currentCaseIndex };
 				//Capture opposite piece
 				if (isPieceWhite(boardRepresentation.board[currentCaseIndex]) != boardRepresentation.isWhiteTurn)
 				{
-					moves.push_back(Move{ pawnCase,currentCaseIndex });
+					if(!isPiecePinned || !isMoveCheckingKing(capture))
+					moves.push_back(capture);
 				}
 				//Else the pawn is blocked by a piece of its camp, nothing to do
 			}
@@ -454,7 +476,9 @@ namespace MoveGeneration
 				if (sideOfPossibleEnPassant == pawnCase)
 				{
 					int posAfterEnPassant = boardRepresentation.isEnPensantPossible.second + step;
-					moves.push_back(Move{ pawnCase, posAfterEnPassant });
+					Move enPassant{ pawnCase, posAfterEnPassant };
+					if(!isPiecePinned || !isMoveCheckingKing(enPassant))
+					moves.push_back(enPassant);
 
 				}
 			}
@@ -782,7 +806,8 @@ namespace MoveGeneration
 	std::vector<int> getLegalOffsetPinnedPiece(const BoardRepresentation & boardRepresentation, int pinnedPieceCase, std::vector<int> possibleOffsets)
 	{
 		//If the Piece is a knight or a pawn, this function should not be call
-		//Because the piece cant move without checking his king
+		//Because knight cant move without checking his king
+		//And pawn does its own logic if it is pinned
 		auto pinnedPiece = boardRepresentation.board[pinnedPieceCase];
 		assert(!isPieceKnight(pinnedPiece) && !isPiecePawn(pinnedPiece));
 
@@ -791,16 +816,19 @@ namespace MoveGeneration
 		for (const int& currentOffset : possibleOffsets)
 		{
 			int currentCaseIndex = pinnedPieceCase;
-			currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
-
-			if (currentCaseIndex == -1) continue; //Outside of the board
-
-			auto currentCase = boardRepresentation.board[currentCaseIndex];
-			if (isPieceKing(currentCase) && boardRepresentation.isWhiteTurn == isPieceWhite(currentCase))
+			while (true)
 			{
-				std::vector<int> pinnedPieceLegalOffset;
-				pinnedPieceLegalOffset.push_back(-1 * currentOffset);
-				return pinnedPieceLegalOffset;
+				currentCaseIndex = mailbox[mailbox64[currentCaseIndex] + currentOffset];
+
+				if (currentCaseIndex == -1) break; //Outside of the board
+
+				auto currentCase = boardRepresentation.board[currentCaseIndex];
+				if (isPieceKing(currentCase) && boardRepresentation.isWhiteTurn == isPieceWhite(currentCase))
+				{
+					std::vector<int> pinnedPieceLegalOffset;
+					pinnedPieceLegalOffset.push_back(-1 * currentOffset);
+					return pinnedPieceLegalOffset;
+				}
 			}
 		}
 

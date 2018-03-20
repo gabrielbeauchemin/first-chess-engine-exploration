@@ -519,6 +519,12 @@ void BoardRepresentation::setCurrentDepth(int depth)
 	this->currentDepth = depth;
 }
 
+void BoardRepresentation::clearLastMovesMetaData()
+{
+	lastCaptures.clear();
+	lastEnPassantMoves.clear();
+}
+
 bool BoardRepresentation::isMoveCastling(Move move)
 {
 	static Move allCastlingMoves[]{ Move{4,6}, Move{ 4,2 }, Move{ 60,62 }, Move{ 60,58 } };

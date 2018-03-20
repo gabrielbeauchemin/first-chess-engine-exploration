@@ -33,6 +33,7 @@ public:
 	std::string toString();
 	int getCurrentDepth();
 	void setCurrentDepth(int depth);
+	void clearLastMovesMetaData();
 
 private: 
 	/*Help for unmakeMove*/

@@ -132,6 +132,7 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		if (!found) {
 			throw std::exception();
 		}
+		currentPosition.clearLastMovesMetaData();
 	}
 
 	currentPosition.setCurrentDepth(0);

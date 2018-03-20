@@ -12,7 +12,7 @@ namespace MoveGeneration
 	std::vector<Move> generateKingMoves(BoardRepresentation& boardRepresentation, int kingCase);
 	std::vector<Move> generateCastlingMoves(BoardRepresentation& boardRepresentation, int kingCase);
 	std::vector<Move> generateQueenMoves(const BoardRepresentation& boardRepresentation, int queenCase, bool isPiecePinned);
-	std::vector<Move> generatePawnMoves(const BoardRepresentation& boardRepresentation, int pawnCase);
+	std::vector<Move> generatePawnMoves(BoardRepresentation& boardRepresentation, int pawnCase, bool isPiecePinned, int kingIndex);
 	std::vector<Move> generatePawnPromotionMoves(const BoardRepresentation& boardRepresentation, int pawnCase, Piece promotion);
 
 	bool isPieceAttacked(BoardRepresentation& boardRepresentation, int pieceCase);

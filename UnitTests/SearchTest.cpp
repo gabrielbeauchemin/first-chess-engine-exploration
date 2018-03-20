@@ -99,9 +99,13 @@ namespace UnitTests
 
 			//From the position, the pawn at g3 is absolutly pined from the black queen.
 			//It can eat the queen, but the engine could not see it
-			BoardRepresentation boardRepresentation5{ "3rkb1r/p1pb1ppp/8/3Qp3/5P1q/6P1/PPPP3P/RNB1K1NR w KQk - 1 11" };
+			/*BoardRepresentation boardRepresentation5{ "3rkb1r/p1pb1ppp/8/3Qp3/5P1q/6P1/PPPP3P/RNB1K1NR w KQk - 1 11" };
 			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
-			Assert::IsTrue("g3h4" == m);
+			Assert::IsTrue("g3h4" == m);*/
+
+			BoardRepresentation boardRepresentation5{ "r2qkb1r/1ppnppp1/3p3p/p3P3/3P4/1BN2Q2/PB3PPP/1K2R3 b k - 0 18 " };
+			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
+			
 		}
 
 	};

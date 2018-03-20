@@ -222,7 +222,7 @@ int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 		                ?kingsIndex[0] : kingsIndex[1];
 	if (isKingCheckmate(boardRepresentation, kingTurnIndex))
 	{
-		int colorFactor = (boardRepresentation.isWhiteTurn) ? 1 : -1;
+		int colorFactor = (boardRepresentation.isWhiteTurn) ? -1 : 1;
 		return colorFactor * biggestEvaluation;
 	}
 

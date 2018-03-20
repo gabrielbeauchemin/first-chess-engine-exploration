@@ -220,6 +220,7 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 		}
 	}
 
+	std::cout << "before playing best Move" << std::endl;
 	Move bestMove = this->search.run(currentPosition);
 	sendBestMove(bestMove, Move{ -1,-1 });
 }

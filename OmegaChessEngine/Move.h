@@ -44,6 +44,18 @@ public:
 		std::string pureCoordinate;
 		pureCoordinate = chessCaseToAlgebraic(from);
 		pureCoordinate += chessCaseToAlgebraic(to);
+		if (!isPieceNone(promotion))
+		{
+			if (isPieceQueen(promotion))
+				pureCoordinate += "q";
+			else if (isPieceBishop(promotion))
+				pureCoordinate += "b";
+			else if (isPieceKnight(promotion))
+				pureCoordinate += "n";
+			else if (isPieceRook(promotion))
+				pureCoordinate += "r";
+		}
+
 		return pureCoordinate;
 	}
 

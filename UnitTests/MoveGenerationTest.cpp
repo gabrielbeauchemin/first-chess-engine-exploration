@@ -9,6 +9,9 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <fstream>
+#include <iostream>
+
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace MoveGeneration;
@@ -361,7 +364,7 @@ namespace UnitTests
 			Assert::IsTrue(isKingStealMate(boardRepresentation, 4));
 		}
 
-		TEST_METHOD(MovesUncheckingKing)
+		TEST_METHOD(EnPassantComplexeCases)
 		{
 			BoardRepresentation boardRepresentation{ "r1bqkbnr/pppppppp/8/8/8/8/PPnPPPPP/RNBQKBNR w KQkq - 0 1" };
 			auto moves = MoveGeneration::generateMoves(boardRepresentation);
@@ -377,7 +380,7 @@ namespace UnitTests
 			//Uncomment for deepest test (takes times)
 			/*nbrNodes = perftParralel(4, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 197281);*/
-			/*nbrNodes = perftParralel(5, BoardRepresentation{});
+			/*long long nbrNodes = perftParralel(5, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 4865609);*/
 		}
 

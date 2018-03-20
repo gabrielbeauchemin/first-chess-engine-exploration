@@ -201,7 +201,6 @@ bool BoardRepresentation::operator==(const BoardRepresentation & other)
 //Legality of it (MoveGeneration will do it)
 void BoardRepresentation::makeMove(Move move)
 {  
-	auto t = toString();
 	assert(!isPieceNone(this->board[move.from]));
 	assert(isPieceWhite(this->board[move.from]) == this->isWhiteTurn);
 	assert(isPieceNone(this->board[move.to]) ||

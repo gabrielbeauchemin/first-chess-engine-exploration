@@ -23,7 +23,7 @@ namespace UnitTests
 
 		//TEST_METHOD(GetCoordinateAlgebraicNotationOutBound)
 		//{
-		//	//They shoould assert
+		//	//They should assert
 		//	Move corner1and2{ -1, 23 };
 		//	Move corner1and2{ 35, 64 }; 
 		//}

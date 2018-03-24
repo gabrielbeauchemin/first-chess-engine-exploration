@@ -103,9 +103,9 @@ namespace UnitTests
 			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
 			Assert::IsTrue("g3h4" == m);*/
 
-			BoardRepresentation boardRepresentation5{ "r2qkb1r/1ppnppp1/3p3p/p3P3/3P4/1BN2Q2/PB3PPP/1K2R3 b k - 0 18 " };
-			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
-			
+			//Coup en passant in reverse was failing
+			/*BoardRepresentation boardRepresentation5{ "r2qkb1r/1ppn1pp1/3pp2p/p2PP3/8/1BN2Q2/PB3PPP/1K2R3 b k - 0 19" };
+			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();*/
 		}
 
 	};

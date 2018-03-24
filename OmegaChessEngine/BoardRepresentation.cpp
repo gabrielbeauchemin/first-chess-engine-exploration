@@ -337,9 +337,24 @@ void BoardRepresentation::makeMove(Move move)
 
 void BoardRepresentation::unmakeMove(Move move)
 {
-	assert(!isPieceNone(board[move.to]));
 	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
-		
+	
+	auto lastEnPassant = this->lastEnPassantMoves.find(currentDepth - 1);
+	this->isEnPensantPossible = lastEnPassant->second;
+	this->lastEnPassantMoves.erase(lastEnPassant);
+	bool lastMoveIsEnPassant = false;
+	if (this->isEnPensantPossible.first)
+	{
+		int step = isWhiteTurn ? -8 : 8;
+		int endPosEnPassant = this->isEnPensantPossible.second + step;
+		Piece pieceAtEnPassantPos = this->board[endPosEnPassant];
+		if (isPiecePawn(pieceAtEnPassantPos) &&
+			isPieceWhite(pieceAtEnPassantPos) != this->isWhiteTurn)
+		{
+			lastMoveIsEnPassant = true;
+		}
+	}
+
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.to, move.from); //Swap King
@@ -367,9 +382,8 @@ void BoardRepresentation::unmakeMove(Move move)
 			this->justLooseRightQueenCastle = false;
 		}
 	}
-	else if (MoveGeneration::isEnPassant(*this, move))
+	else if (lastMoveIsEnPassant)
 	{
-		assert(this->isEnPensantPossible.first == false);
 		swap<Piece>(board, move.from, move.to); //Move the piece
 		//Put back the pawn captured last move by en passant
 		Piece capturedEnPassantPawn = this->isWhiteTurn ? Piece::whitePawn : Piece::blackPawn;
@@ -457,10 +471,6 @@ void BoardRepresentation::unmakeMove(Move move)
 		--this->reversibleMovesInRow;
 	}
 	else this->reversibleMovesInRow = lastReversibleMovesinRow;
-
-	auto lastEnPassant = this->lastEnPassantMoves.find(currentDepth - 1);
-	this->isEnPensantPossible = lastEnPassant->second;
-	this->lastEnPassantMoves.erase(lastEnPassant);
 
 	--currentDepth;
 }

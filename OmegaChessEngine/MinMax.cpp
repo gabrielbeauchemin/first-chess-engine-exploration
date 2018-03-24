@@ -33,8 +33,8 @@ std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, 
 		if (makesWhiteWin)
 		{
 			if (score == Evaluation::biggestEvaluation) //Force checkmath for max player
-				return std::pair<int, Move>(score, Move{ -1, -1 });
-			if (v < score)
+				return std::pair<int, Move>(score, m);
+			if (v <= score)
 			{
 				v = score;
 				bestMove = m;
@@ -42,7 +42,7 @@ std::pair<int, Move> MinMax::maxValue(BoardRepresentation& boardRepresentation, 
 		}
 		else
 		{
-			if (v > score)
+			if (v >= score)
 			{
 				v = score;
 				bestMove = m;
@@ -73,14 +73,14 @@ int MinMax::minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWi
 		{
 			if (score == -1 * Evaluation::biggestEvaluation) //Force checkmath for min player
 				return score;
-			if (v > score)
+			if (v >= score)
 				v = score;
 		}
 		else
 		{
 			if (score == Evaluation::biggestEvaluation) //Force checkmath for min player
 				return score;
-			if (v < score)
+			if (v <= score)
 				v = score;
 		}
 		

@@ -370,18 +370,18 @@ namespace UnitTests
 			auto moves = MoveGeneration::generateMoves(boardRepresentation);
 			Assert::AreEqual(1, (int)moves.size() );
 		}
-
 		TEST_METHOD(Perft)
 		{
-			long long nbrNodes = perftParralel(2, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 400);
-			nbrNodes = perftParralel(3, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 8902);
-			//Uncomment for deepest test (takes times)
-			nbrNodes = perftParralel(4, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 197281);
-			/*long long nbrNodes = perftParralel(5, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 4865609);*/
+			//long long nbrNodes = perftParralel(2, BoardRepresentation{});
+			//Assert::IsTrue(nbrNodes == 400);
+			//nbrNodes = perftParralel(3, BoardRepresentation{});
+			//Assert::IsTrue(nbrNodes == 8902);
+			////Uncomment for deepest test (takes times)
+			//nbrNodes = perftParralel(4, BoardRepresentation{});
+			//Assert::IsTrue(nbrNodes == 197281);
+			long long nbrNodes = perftParralel(5, BoardRepresentation{});
+			std::cout << nbrNodes;
+			Assert::IsTrue(nbrNodes == 4865609);
 		}
 
 		private:

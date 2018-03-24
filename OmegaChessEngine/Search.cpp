@@ -27,7 +27,7 @@ Move Search::run(BoardRepresentation& b)
 		std::pair<int, Move> res = this->minMax.run(b);
 		if (b.isWhiteTurn)
 		{
-			if (bestHeuristic < res.first)
+			if (bestHeuristic <= res.first)
 			{
 				bestHeuristic = res.first;
 				bestMoveFound = res.second;
@@ -35,7 +35,7 @@ Move Search::run(BoardRepresentation& b)
 		}
 		else
 		{
-			if (bestHeuristic > res.first)
+			if (bestHeuristic >= res.first)
 			{
 				bestHeuristic = res.first;
 				bestMoveFound = res.second;

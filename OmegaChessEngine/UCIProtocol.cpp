@@ -99,11 +99,11 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		std::string fen;
 
 		while (input >> token) {
-			if (token == "moves") {
-				break;
+			if (token != "moves") {
+				fen += token + " ";
 			}
 			else {
-				fen += token + " ";
+				break;
 			}
 		}
 
@@ -132,10 +132,9 @@ void UCIProtocol::receivePosition(std::istringstream& input) {
 		if (!found) {
 			throw std::exception();
 		}
-		currentPosition.clearLastMovesMetaData();
+		
 	}
 
-	currentPosition.setCurrentDepth(0);
 	// Don't start searching though!
 }
 
@@ -164,9 +163,9 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 		}
 	}
 	else if (token == "movetime") {
-		uint64_t searchTime;
-		if (input >> searchTime) {
-			search.setTimeMax(searchTime);
+		uint64_t secSearchTime;
+		if (input >> secSearchTime) {
+		   this->search.setTimeMax(secSearchTime);
 		}
 	}
 	else if (token == "infinite") {
@@ -186,6 +185,11 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 				if (!(input >> whiteTimeLeft)) {
 					throw std::exception();
 				}
+				//less than one minute for the engine: play faster!
+				if (this->currentPosition.isWhiteTurn && whiteTimeLeft < 60000)
+				{
+					this->search.setTimeMax(whiteTimeLeft/6);
+				}
 			}
 			else if (token == "winc") {
 				if (!(input >> whiteTimeIncrement)) {
@@ -195,6 +199,11 @@ void UCIProtocol::receiveGo(std::istringstream& input) {
 			else if (token == "btime") {
 				if (!(input >> blackTimeLeft)) {
 					throw std::exception();
+				}
+				//less than one minute for the engine: play faster!
+				if (!this->currentPosition.isWhiteTurn && blackTimeLeft < 60000)
+				{
+					this->search.setTimeMax(blackTimeLeft / 6);
 				}
 			}
 			else if (token == "binc") {

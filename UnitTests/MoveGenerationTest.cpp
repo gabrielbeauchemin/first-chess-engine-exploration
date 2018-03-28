@@ -372,16 +372,16 @@ namespace UnitTests
 		}
 		TEST_METHOD(Perft)
 		{
-			//long long nbrNodes = perftParralel(2, BoardRepresentation{});
-			//Assert::IsTrue(nbrNodes == 400);
-			//nbrNodes = perftParralel(3, BoardRepresentation{});
-			//Assert::IsTrue(nbrNodes == 8902);
-			////Uncomment for deepest test (takes times)
-			//nbrNodes = perftParralel(4, BoardRepresentation{});
-			//Assert::IsTrue(nbrNodes == 197281);
+			long long nbrNodes = perftParralel(2, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 400);
+			nbrNodes = perftParralel(3, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 8902);
+			//Uncomment for deepest test (takes times)
+			/*nbrNodes = perftParralel(4, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 197281);
 			long long nbrNodes = perftParralel(5, BoardRepresentation{});
 			std::cout << nbrNodes;
-			Assert::IsTrue(nbrNodes == 4865609);
+			Assert::IsTrue(nbrNodes == 4865609);*/
 		}
 
 		private:

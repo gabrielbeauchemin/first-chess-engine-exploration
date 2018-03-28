@@ -2,20 +2,21 @@
 #define Timer_H 
 
 #include <thread>
+#include <cinttypes>
 
 class Timer
 {
 public:
 	Timer();
-	Timer(unsigned int msBeforeTimeout);
+	Timer(uint64_t msBeforeTimeout);
 	bool isTimeOut();
-	void setTimeMax(unsigned int msBeforeTimeout);
+	void setTimeMax(uint64_t msBeforeTimeout);
 	void forceTimeOut();
 
 	void reset();
 
 private:
-	unsigned int msBeforeTimeout;
+	uint64_t msBeforeTimeout;
 	std::chrono::time_point<std::chrono::system_clock> start, end;
 	bool isForcedTimeOut = false;
 };

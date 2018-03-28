@@ -1,13 +1,13 @@
 #include "BoardRepresentation.h"
-#include "IlegalMoveException.h"
 //#define NDEBUG 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <fstream>
 
 //init board from FEN notation: https://fr.wikipedia.org/wiki/Notation_Forsyth-Edwards
 //Used also during UTC protocol
@@ -26,26 +26,27 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 	};
 
 	std::vector<std::string> fenSplitted = split(fen, ' ');
-
+	
 	//Fen Notation has 6 parts:
 
 	// 1)Pieces Position
 	//rook(tour), knight(cavalier), bishop(fou), queen(dame), king(roi) et pawn(pion).
 	static std::map<int, Piece> charToPiece{ {'r', Piece::blackRook},{'n', Piece::blackKnight },{ 'b', Piece::blackBishop },{ 'q', Piece::blackQueen },{ 'k', Piece::blackKing },{ 'p', Piece::blackPawn },{ 'R', Piece::whiteRook },{ 'N', Piece::whiteKnight },{ 'B', Piece::whiteBishop },{ 'Q', Piece::whiteQueen },{ 'K', Piece::whiteKing },{ 'P', Piece::whitePawn } };
 	std::vector<std::string> rowPieces = split(fenSplitted[0], '/');
-	for(int indexRow =0; indexRow < 8; ++indexRow)
+	for(size_t indexRow =0; indexRow < 8; ++indexRow)
 	{
 		std::string row = rowPieces[indexRow];
 		int indexBoard = (7 - indexRow) * 8; //Begin by the row at the end
-		for (int indexCase = 0; indexCase < row.size(); )
+		std::clog << " row: " << row; //To do: remove Hack: In release, optimiser is too aggressive on the variable row and destroy the validity of the function. This line does allow optimisation on variable row
+		for (size_t indexCase = 0; indexCase < row.size(); )
 		{
 			char currentCase = row[indexCase];
 			//Number between 1 to 8 indicated the number of empty cases
-			if (isdigit(currentCase))
+			if (isdigit(currentCase) != 0)
 			{
-				char nbrEmtyCases = atoi(&currentCase);
-				assert(nbrEmtyCases > 0 && nbrEmtyCases < 9);
-				for (int temp = 0; temp < nbrEmtyCases; ++temp)
+				int nbrEmptyCases = atoi(&currentCase);
+				assert(nbrEmptyCases > 0 && nbrEmptyCases < 9);
+				for (int temp = 0; temp < nbrEmptyCases; ++temp)
 				{
 					this->board[indexBoard] = Piece::none;
 					++indexBoard;
@@ -63,35 +64,41 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 	}
 	// 2)Who is turn to play
 	if (fenSplitted[1][0] == 'w')
-		this->isWhiteTurn = true;
-	else this->isWhiteTurn = false;
-
-	// 3)Possible rook
-	if (fenSplitted[2][0] == '-')
 	{
-		this->canWhiteKingCastle = false;
-		this->canWhiteQueenCastle = false;
-		this->canBlackKingCastle = false;
-		this->canBlackQueenCastle = false;
+		this->isWhiteTurn = true;
 	}
 	else
 	{
-		this->canWhiteKingCastle = false;
-		this->canWhiteQueenCastle = false;
-		this->canBlackKingCastle = false;
-		this->canBlackQueenCastle = false;
+		this->isWhiteTurn = false;
+	}
 
+	// 3)Possible rook
+	this->canWhiteKingCastle = false;
+	this->canWhiteQueenCastle = false;
+	this->canBlackKingCastle = false;
+	this->canBlackQueenCastle = false;
+	if (fenSplitted[2][0] != '-')
+	{
 		if (fenSplitted[2].find('K') != std::string::npos)
+		{
 			this->canWhiteKingCastle = true;
+		}
 		if (fenSplitted[2].find('Q') != std::string::npos)
+		{
 			this->canWhiteQueenCastle = true;
+		}
 		if (fenSplitted[2].find('k') != std::string::npos)
+		{
 			this->canBlackKingCastle = true;
+		}
 		if (fenSplitted[2].find('q') != std::string::npos)
+		{
 			this->canBlackQueenCastle = true;
+		}
 	}
 	
 	// 4)Possible en Passant
+	this->isEnPensantPossible = std::pair<bool, int>{ false, -1 };
 	if (fenSplitted[3][0] != '-')
 	{
 		static std::map<char, int> algebraicToColumnIndex{ { 'a',0 },{ 'b',1 },{ 'c',2 },{ 'd',3 },{ 'e',4 },{ 'f',5 },{ 'g',6 },{ 'h',7 } };
@@ -122,9 +129,19 @@ BoardRepresentation::BoardRepresentation()
 	//Initialize board with beginning position
 	board[0] = Piece::whiteRook; board[1] = Piece::whiteKnight; board[2] = Piece::whiteBishop; board[3] = Piece::whiteQueen;
 	board[4] = Piece::whiteKing; board[5] = Piece::whiteBishop; board[6] = Piece::whiteKnight; board[7] = Piece::whiteRook;
-	for (int i = 8; i != 16; ++i) board[i] = Piece::whitePawn;
-	for (int i = 16; i != 48; ++i) board[i] = Piece::none;
-	for (int i = 48; i != 56; ++i) board[i] = Piece::blackPawn;
+	for (int i = 8; i != 16; ++i)
+	{
+		board[i] = Piece::whitePawn;
+	}
+	for (int i = 16; i != 48; ++i)
+	{
+		board[i] = Piece::none;
+	}
+	for (int i = 48; i != 56; ++i)
+	{
+		board[i] = Piece::blackPawn;
+	}
+
 	board[56] = Piece::blackRook; board[57] = Piece::blackKnight; board[58] = Piece::blackBishop; board[59] = Piece::blackQueen;
 	board[60] = Piece::blackKing; board[61] = Piece::blackBishop; board[62] = Piece::blackKnight; board[63] = Piece::blackRook;
 }
@@ -140,18 +157,24 @@ BoardRepresentation::BoardRepresentation(std::vector<std::pair<int, Piece>> piec
 	this->isEnPensantPossible = std::pair<bool, int>(false, -1);
 
 	//Put an empty board
-	for (int i = 0; i < 64; ++i)
-		this->board[i] = Piece::none;
+	for (Piece& p : this->board)
+	{
+		p = Piece::none;
+	}
 
 	//Place the pieces requested
 	for (auto& pieceToPlace : piecesToPlace)
+	{
 		this->board[pieceToPlace.first] = pieceToPlace.second;
+	}
 }
 
-BoardRepresentation & BoardRepresentation::operator=(const BoardRepresentation& other)
+BoardRepresentation& BoardRepresentation::operator=(const BoardRepresentation& other)
 {
-	for (int i = 0; i<64; ++i)
+	for (int i = 0; i < 64; ++i)
+	{
 		this->board[i] = other.board[i];
+	}
 	this->canBlackKingCastle = other.canBlackKingCastle;
 	this->canBlackQueenCastle = other.canBlackQueenCastle;
 	this->canWhiteKingCastle = other.canWhiteKingCastle;
@@ -162,7 +185,7 @@ BoardRepresentation & BoardRepresentation::operator=(const BoardRepresentation& 
 	this->justLooseRightQueenCastle = other.justLooseRightQueenCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
-	this->currentDepth = currentDepth;
+	this->currentDepth = other.currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
 
 	return *this;
@@ -170,8 +193,10 @@ BoardRepresentation & BoardRepresentation::operator=(const BoardRepresentation& 
 
 BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
 {
-	for (int i = 0; i<64; ++i)
+	for (int i = 0; i < 64; ++i)
+	{
 		this->board[i] = other.board[i];
+	}
 	this->canBlackKingCastle = other.canBlackKingCastle;
 	this->canBlackQueenCastle = other.canBlackQueenCastle;
 	this->canWhiteKingCastle = other.canWhiteKingCastle;
@@ -182,7 +207,7 @@ BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
 	this->justLooseRightQueenCastle = other.justLooseRightQueenCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
-	this->currentDepth = currentDepth;
+	this->currentDepth = other.currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
 }
 
@@ -191,7 +216,9 @@ bool BoardRepresentation::operator==(const BoardRepresentation & other)
 	for (int i = 0; i < 64; ++i)
 	{
 		if (this->board[i] != other.board[i])
+		{
 			return false;
+		}
 	}
 
 	return true;
@@ -211,12 +238,26 @@ void BoardRepresentation::makeMove(Move move)
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.from, move.to); //Swap King
-		bool isKingSideCastling = (move.from - move.to < 0) ? true : false;
-		int rookPos;
-		if (this->isWhiteTurn && isKingSideCastling) rookPos = 7;
-		else if (this->isWhiteTurn && !isKingSideCastling) rookPos = 0;
-		else if (!this->isWhiteTurn && isKingSideCastling) rookPos = 63;
-		else if (!this->isWhiteTurn && !isKingSideCastling) rookPos = 56;
+		bool isKingSideCastling = (move.from - move.to < 0);
+		int rookPos = 1;
+		if (this->isWhiteTurn && isKingSideCastling)
+		{
+			rookPos = 7;
+		}
+		else if (this->isWhiteTurn && !isKingSideCastling)
+		{
+			rookPos = 0;
+		}
+		else if (!this->isWhiteTurn && isKingSideCastling)
+		{
+			rookPos = 63;
+		}
+		else if (!this->isWhiteTurn && !isKingSideCastling)
+		{
+			rookPos = 56;
+		}
+		assert(rookPos != -1);
+
 		int translationRook = (isKingSideCastling) ? -2 : 3;
 		swap<Piece>(board, rookPos, rookPos + translationRook); //Swap Rook
 
@@ -309,7 +350,9 @@ void BoardRepresentation::makeMove(Move move)
 
 		//Promotion
 		if (!isPieceNone(move.promotion))
+		{
 			board[move.to] = move.promotion;
+		}
 	}
 	
 	isWhiteTurn = !this->isWhiteTurn;
@@ -358,12 +401,26 @@ void BoardRepresentation::unmakeMove(Move move)
 	if (isMoveCastling(move)) //Case Castling:
 	{
 		swap<Piece>(board, move.to, move.from); //Swap King
-		bool isKingSideCastling = (move.from - move.to < 0) ? true : false;
-		int initialRookPos;
-		if (this->isWhiteTurn && isKingSideCastling) initialRookPos = 63;
-		else if (this->isWhiteTurn && !isKingSideCastling) initialRookPos = 56;
-		else if (!this->isWhiteTurn && isKingSideCastling) initialRookPos = 7;
-		else if (!this->isWhiteTurn && !isKingSideCastling) initialRookPos = 0;
+		bool isKingSideCastling = (move.from - move.to < 0);
+		int initialRookPos = -1;
+		if (this->isWhiteTurn && isKingSideCastling)
+		{
+			initialRookPos = 63;
+		}
+		else if (this->isWhiteTurn && !isKingSideCastling)
+		{
+			initialRookPos = 56;
+		}
+		else if (!this->isWhiteTurn && isKingSideCastling)
+		{
+			initialRookPos = 7;
+		}
+		else if (!this->isWhiteTurn && !isKingSideCastling)
+		{
+			initialRookPos = 0;
+		}
+		assert(initialRookPos != -1);
+
 		int translationRook = (isKingSideCastling) ? -2 : 3;
 		swap<Piece>(board, initialRookPos + translationRook, initialRookPos); //Swap Rook
 
@@ -449,9 +506,14 @@ void BoardRepresentation::unmakeMove(Move move)
 		//In case of Promotion
 		if (!isPieceNone(move.promotion))
 		{
-			if (isWhiteTurn)
+			if (isPieceWhite(move.promotion))
+			{
 				board[move.from] = Piece::whitePawn;
-			else board[move.from] = Piece::blackPawn;
+			}
+			else
+			{
+				board[move.from] = Piece::blackPawn;
+			}
 
 		}
 
@@ -470,43 +532,70 @@ void BoardRepresentation::unmakeMove(Move move)
 	{
 		--this->reversibleMovesInRow;
 	}
-	else this->reversibleMovesInRow = lastReversibleMovesinRow;
+	else
+	{
+		this->reversibleMovesInRow = lastReversibleMovesinRow;
+	}
 
 	--currentDepth;
 }
 
 std::string BoardRepresentation::toString()
 {
-	std::string stringBoard = "";
+	std::string stringBoard;
 	auto pieceToChar = [](Piece p) ->char
 	{
 		char charPiece;
 		if (isPieceBishop(p))
-			charPiece =  'b';
+		{
+			charPiece = 'b';
+		}
 		else if (isPieceKing(p))
+		{
 			charPiece = 'k';
+		}
 		else if (isPieceKnight(p))
+		{
 			charPiece = 'n';
+		}
 		else if (isPieceNone(p))
+		{
 			charPiece = ' ';
+		}
 		else if (isPiecePawn(p))
+		{
 			charPiece = 'p';
+		}
 		else if (isPieceQueen(p))
+		{
 			charPiece = 'q';
-		else if (isPieceRook(p))
-			charPiece = 'r';
-		else throw std::exception{};
 
-		if (isPieceWhite(p)) return toupper(charPiece);
-		else return charPiece;
+		}
+		else if (isPieceRook(p))
+		{
+			charPiece = 'r';
+		}
+		else
+		{
+			assert(false);
+		}
+
+		if (isPieceWhite(p))
+		{
+			return toupper(charPiece);
+		}
+		
+		return charPiece;
 	};
 
-	std::string charPieces[64];
+	char charPieces[64];
 	for (int i = 0; i < 64; ++i)
+	{
 		charPieces[i] = pieceToChar(this->board[i]);
+	}
 
 	int nextPiece = 64;
-	auto getNextPiece = [&nextPiece, &charPieces] {return charPieces[--nextPiece]; };
+	auto getNextPiece = [&nextPiece, &charPieces] {return std::string(1,charPieces[--nextPiece]); };
 	for (int row = 0; row < 8; ++row)
 	{
 		stringBoard += "#################################################\r\n";
@@ -524,13 +613,9 @@ int BoardRepresentation::getCurrentDepth()
 	return this->currentDepth;
 }
 
-void BoardRepresentation::setCurrentDepth(int depth)
-{
-	this->currentDepth = depth;
-}
-
 void BoardRepresentation::clearLastMovesMetaData()
 {
+	this->currentDepth = 0;
 	lastCaptures.clear();
 	lastEnPassantMoves.clear();
 }
@@ -539,17 +624,27 @@ bool BoardRepresentation::isMoveCastling(Move move)
 {
 	static Move allCastlingMoves[]{ Move{4,6}, Move{ 4,2 }, Move{ 60,62 }, Move{ 60,58 } };
 	for (auto& m : allCastlingMoves)
+	{
 		if (m == move)
+		{
 			return true;
+		}
+	}
+	
 	return false;
 }
 
 bool BoardRepresentation::movesPermitEnPassant(Move lastMove)
 {
-	if (abs(lastMove.from - lastMove.to) != 16) //En passant only if pawn go forward of two cases
+	//En passant only if pawn go forward of two cases
+	if (abs(lastMove.from - lastMove.to) != 16)
+	{
 		return false;
+	}
 	if (!isPiecePawn(board[lastMove.to]))
+	{
 		return false;
+	}
 
 	//If the move permit En Passant, that means that its a pawn 
 	//that advance two cases and a pawn from the opposite camp
@@ -570,18 +665,16 @@ bool BoardRepresentation::movesPermitEnPassant(Move lastMove)
 		return isPiecePawn(board[lastMove.to - 1]) &&
 			   isPieceWhite(board[lastMove.to - 1]) != this->isWhiteTurn; //Pawn to the side must be from opposite camp
 	}
-	else //Pawn in the middles, check both side of them
-	{
-		bool oppositePawnLeftSide = (isPiecePawn(board[lastMove.to + 1]) &&
-			                        isPieceWhite(board[lastMove.to + 1]) != isPieceWhite(board[lastMove.to])); //Pawn to the side must be from opposite camp
-		bool oppositePawnRightSide = (isPiecePawn(board[lastMove.to - 1]) &&
-			                         isPieceWhite(board[lastMove.to - 1]) != isPieceWhite(board[lastMove.to])); //Pawn to the side must be from opposite camp
-		//At least one pawn from opposite camp should be to its side to permit en passant
-		return oppositePawnLeftSide || oppositePawnRightSide;
-	}
+
+	//Else: Pawn in the middles, check both side of them
+	bool oppositePawnLeftSide = (isPiecePawn(board[lastMove.to + 1]) &&
+			                    isPieceWhite(board[lastMove.to + 1]) != isPieceWhite(board[lastMove.to])); //Pawn to the side must be from opposite camp
+	bool oppositePawnRightSide = (isPiecePawn(board[lastMove.to - 1]) &&
+			                        isPieceWhite(board[lastMove.to - 1]) != isPieceWhite(board[lastMove.to])); //Pawn to the side must be from opposite camp
+	//At least one pawn from opposite camp should be to its side to permit en passant
+	return oppositePawnLeftSide || oppositePawnRightSide;
+	
 }
-
-
 
 template<class T>
 void BoardRepresentation::swap(T array[], int i, int j)

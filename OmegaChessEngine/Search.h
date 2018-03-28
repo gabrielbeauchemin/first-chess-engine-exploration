@@ -11,7 +11,7 @@ public:
 	Search(int msMaxByMove);
 	Move run(BoardRepresentation&);
 	void stop();
-	void setTimeMax(int msMaxByMove);
+	void setTimeMax(uint64_t msMaxByMove);
 
 private:
 	MinMax minMax;

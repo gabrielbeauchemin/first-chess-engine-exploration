@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include "Piece.h"
 //#define NDEBUG 
-#include <assert.h>
+#include <cassert>
 
 /* Representation of a chess move that a piece have from
    a case to another.*/
@@ -47,13 +47,23 @@ public:
 		if (!isPieceNone(promotion))
 		{
 			if (isPieceQueen(promotion))
+			{
 				pureCoordinate += "q";
+			}
 			else if (isPieceBishop(promotion))
+			{
 				pureCoordinate += "b";
+
+			}
 			else if (isPieceKnight(promotion))
+			{
 				pureCoordinate += "n";
+			}
 			else if (isPieceRook(promotion))
+			{
 				pureCoordinate += "r";
+
+			}
 		}
 
 		return pureCoordinate;

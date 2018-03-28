@@ -21,7 +21,7 @@ namespace UnitTests
 			auto start = std::chrono::system_clock::now();
 			Move m = search.run(BoardRepresentation{});
 			auto end = std::chrono::system_clock::now();
-			int timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			auto timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 			Assert::IsTrue(timePassed < msMaxByMove + estimation);
 		}
@@ -29,15 +29,15 @@ namespace UnitTests
 		TEST_METHOD(EnginePlayAgainstItself)
 		{
 			const int msMaxByMove = 3000;
-			const int nbMoves = 10;
+			const int nbMoves = 3;
 			BoardRepresentation boardRepresentation{};
-			std::string allPositions = "";
+			//std::string allPositions = "";
 			for (int i = 0; i < nbMoves; ++i)
 			{
 				Search search{ msMaxByMove };
 				Move m = search.run(boardRepresentation);
 				boardRepresentation.makeMove(m);
-				allPositions += boardRepresentation.toString(); + "\r\n";
+				//allPositions += boardRepresentation.toString(); + "\r\n";
 
 				int kingIndex;
 				for (int i = 0 ;i < 64; ++i)
@@ -52,10 +52,6 @@ namespace UnitTests
 				if (MoveGeneration::isKingCheckmate(boardRepresentation, kingIndex))
 					break;
 			}
-			
-			
-
-			
 		}
 
 		TEST_METHOD(PlayGameAgainstEngine)
@@ -97,15 +93,31 @@ namespace UnitTests
 			//m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
 			//Assert::IsFalse("d4c3" == m);
 
-			//From the position, the pawn at g3 is absolutly pined from the black queen.
-			//It can eat the queen, but the engine could not see it
-			/*BoardRepresentation boardRepresentation5{ "3rkb1r/p1pb1ppp/8/3Qp3/5P1q/6P1/PPPP3P/RNB1K1NR w KQk - 1 11" };
-			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();
-			Assert::IsTrue("g3h4" == m);*/
+			////From the position, the pawn at g3 is absolutly pined from the black queen.
+			////It can eat the queen, but the engine could not see it
+			//BoardRepresentation boardRepresentation6{ "3rkb1r/p1pb1ppp/8/3Qp3/5P1q/6P1/PPPP3P/RNB1K1NR w KQk - 1 11" };
+			//m = search.run(boardRepresentation6).getCoordinateAlgebraicNotation();
+			//Assert::IsTrue("g3h4" == m);
 
-			//Coup en passant in reverse was failing
-			/*BoardRepresentation boardRepresentation5{ "r2qkb1r/1ppn1pp1/3pp2p/p2PP3/8/1BN2Q2/PB3PPP/1K2R3 b k - 0 19" };
-			auto m = search.run(boardRepresentation5).getCoordinateAlgebraicNotation();*/
+			////Coup en passant in reverse was failing
+			//BoardRepresentation boardRepresentation7{ "r2qkb1r/1ppn1pp1/3pp2p/p2PP3/8/1BN2Q2/PB3PPP/1K2R3 b k - 0 19" };
+			//m = search.run(boardRepresentation7).getCoordinateAlgebraicNotation();
+
+			//TO DO: Then white, king eats pawn h5h6 and the move genarator didnt found this move, (assert in the protocol while placing the position)
+			//8/1pp2p2/3pk2p/6pK/p1PPP3/6P1/PP5P/8 w - - 0 11 
+
+			//Reverse pawn promotion was failing
+			/*BoardRepresentation boardRepresentation9{ "r4r2/ppp3pp/3P1pk1/3B4/4P1b1/5N2/PPN2KPP/R6R w - -1 20" };
+			boardRepresentation9.makeMove(Move{43,50});
+			boardRepresentation9.clearLastMovesMetaData();
+			auto m = search.run(boardRepresentation9).getCoordinateAlgebraicNotation();*/
+
+			//After pawn eat rook to get a promotion, it was failing
+			BoardRepresentation boardRepresentation10{ "r2r4/ppP3pp/5pk1/3B4/4P3/5K2/PPN3PP/R6R w - - 1 22" };
+			boardRepresentation10.makeMove(Move{ 50,59 });
+			boardRepresentation10.clearLastMovesMetaData();
+			auto m = search.run(boardRepresentation10).getCoordinateAlgebraicNotation();
+			 
 		}
 
 	};

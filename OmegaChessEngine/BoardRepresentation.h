@@ -4,7 +4,7 @@
 #include <utility>  //For pair and make_pair
 #include "Piece.h"
 #include "Move.h"
-#include <String>
+#include <string>
 #include "MoveGeneration.hpp"
 #include <map>
 
@@ -32,7 +32,6 @@ public:
 	void unmakeMove(Move move);
 	std::string toString();
 	int getCurrentDepth();
-	void setCurrentDepth(int depth);
 	void clearLastMovesMetaData();
 
 private: 

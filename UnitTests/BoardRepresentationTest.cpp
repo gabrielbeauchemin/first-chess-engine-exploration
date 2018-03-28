@@ -7,6 +7,7 @@
 #include "../OmegaChessEngine/Piece.h"
 #include "string"
 
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace MoveGeneration;
 
@@ -100,6 +101,7 @@ namespace UnitTests
 		TEST_METHOD(BoardInitFen)
 		{
 			BoardRepresentation board{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
+			auto b = board.toString();
 			Assert::IsTrue(board.isWhiteTurn);
 			Assert::IsFalse(board.isEnPensantPossible.first);
 			Assert::IsTrue(board.canBlackKingCastle && board.canBlackQueenCastle && board.canWhiteKingCastle && board.canWhiteQueenCastle);

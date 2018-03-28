@@ -18,10 +18,10 @@ Move Search::run(BoardRepresentation& b)
 	timer.reset();
 	while (true)
 	{
-		b.setCurrentDepth(0);
+		b.clearLastMovesMetaData();
 		auto stopSearching = [currentDepth,this](BoardRepresentation& b) 
 		{
-			return /*timer.isTimeOut() ||*/ b.getCurrentDepth() > 1; 
+			return /*this->timer.isTimeOut() ||*/ b.getCurrentDepth() > 1; 
 		};
 		this->minMax = MinMax{ Evaluation::evaluate, MoveGeneration::generateMoves, stopSearching };
 		std::pair<int, Move> res = this->minMax.run(b);
@@ -42,7 +42,6 @@ Move Search::run(BoardRepresentation& b)
 			}
 		}
 
-		//TO DO:Decomment, to put back deep iterative
 		/*if (timer.isTimeOut())*/ break;
 		++currentDepth;
 	}
@@ -58,7 +57,7 @@ void Search::stop()
 	//timer.forceTimeOut();
 }
 
-void Search::setTimeMax(int msMaxByMove)
+void Search::setTimeMax(uint64_t msMaxByMove)
 {
 	timer.setTimeMax(msMaxByMove);
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "UCIProtocol.h"
+#include <fstream>
 
 void printUsage()
 {
@@ -7,6 +8,8 @@ void printUsage()
 }
 int main(int argc, char* argv[])
 {
+	std::ofstream out{ "log" };
+	std::clog.rdbuf(out.rdbuf());
 	if (argc == 1) {
 		UCIProtocol protocol;
 		protocol.run();;
@@ -14,5 +17,5 @@ int main(int argc, char* argv[])
 	else if (argc > 1) {
 		printUsage();
 	}
-	
+	std::clog.rdbuf(nullptr);
 }

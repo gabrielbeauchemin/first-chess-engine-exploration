@@ -27,7 +27,7 @@ namespace UnitTests
 					//Do some work ...
 					std::this_thread::sleep_for(std::chrono::milliseconds(10));
 					auto end = std::chrono::system_clock::now();
-					int timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+					auto timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 					if (timePassed > (timerTime))
 					{
 						Assert::IsTrue(timer.isTimeOut());

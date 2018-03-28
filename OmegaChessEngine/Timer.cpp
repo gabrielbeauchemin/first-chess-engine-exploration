@@ -7,7 +7,7 @@ Timer::Timer()
 {
 }
 
-Timer::Timer(unsigned int msBeforeTimeout) : msBeforeTimeout{ msBeforeTimeout }
+Timer::Timer(uint64_t msBeforeTimeout) : msBeforeTimeout{ msBeforeTimeout }
 {
 }
 
@@ -21,12 +21,12 @@ bool Timer::isTimeOut()
 {
 	if (this->isForcedTimeOut == true) return true;
 	end = std::chrono::system_clock::now();
-	int msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	uint64_t msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	return  msPassed > msBeforeTimeout;
 }
 
 
-void Timer::setTimeMax(unsigned int msBeforeTimeout)
+void Timer::setTimeMax(uint64_t msBeforeTimeout)
 {
 	this->msBeforeTimeout = msBeforeTimeout;
 }

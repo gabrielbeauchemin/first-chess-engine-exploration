@@ -199,7 +199,10 @@ int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 	for (int caseIndex = 0; caseIndex < 64; ++caseIndex)
 	{
 		Piece currentCase = boardRepresentation.board[caseIndex];
-		if (isPieceNone(currentCase)) continue;
+		if (isPieceNone(currentCase))
+		{
+			continue;
+		}
 		pieces.push_back(currentCase);
 
 		//Special Process for king because it has a matrice for the
@@ -238,16 +241,25 @@ int Evaluation::evaluate(BoardRepresentation& boardRepresentation)
 		if (isEndGame(boardRepresentation, pieces))
 		{
 			if (isPieceWhite(boardRepresentation.board[kingIndex]))
+			{
 				score += whiteKingEndGamePositionValue[kingIndex];
+
+			}
 			else
+			{
 				score -= blackKingEndGamePositionValue[kingIndex];
+			}
 		}
 		else
 		{
 			if (isPieceWhite(boardRepresentation.board[kingIndex]))
+			{
 				score += whiteKingMiddleGamePositionValue[kingIndex];
+			}
 			else
+			{
 				score -= blackKingMiddleGamePositionValue[kingIndex];
+			}
 		}
 	}
 
@@ -266,16 +278,28 @@ bool Evaluation::isEndGame(BoardRepresentation& boardRepresentation, std::vector
 	auto isMinorPiece = [](Piece p) { return (isPieceBishop(p) || isPieceKnight(p) || isPieceRook(p)); };
 	for (auto& piece : pieces)
 	{
-		if (isPieceWhite)
+		if (isPieceWhite(piece))
 		{
-			if (isMinorPiece(piece)) whiteMinorPieces.push_back(piece);
-			else if (isPieceQueen(piece)) whitehasQueen = true;
-
+			if (isMinorPiece(piece))
+			{
+				whiteMinorPieces.push_back(piece);
+			}
+			else if (isPieceQueen(piece))
+			{
+				whitehasQueen = true;
+			}
 		}
 		else
 		{
-			if (isMinorPiece(piece)) blackMinorPieces.push_back(piece);
-			else if (isPieceQueen(piece)) blackHasQueen = true;
+			if (isMinorPiece(piece))
+			{
+				blackMinorPieces.push_back(piece);
+
+			}
+			else if (isPieceQueen(piece))
+			{
+				blackHasQueen = true;
+			}
 		}
 	}
 

@@ -1,5 +1,4 @@
 #include "MoveGeneration.hpp"
-#include "NotImplementedException.h"
 #include <algorithm>
 //#define NDEBUG 
 #include <assert.h>
@@ -44,7 +43,7 @@ namespace MoveGeneration
 	std::vector<Move> generateMoves(BoardRepresentation& boardRepresentation)
 	{
 		//Find king index
-		int kingIndex;
+		int kingIndex = -1;
 		for (int caseIndex = 0; caseIndex < 64; ++caseIndex)
 		{
 			if (isPieceKing(boardRepresentation.board[caseIndex]) &&
@@ -54,6 +53,7 @@ namespace MoveGeneration
 				break;
 			}
 		}
+		assert(kingIndex != -1);
 
 		//If the king is cheked
 		bool isKingInCheck = false;
@@ -496,10 +496,10 @@ namespace MoveGeneration
 		if (isPieceNone(board.board[pawnCase + step]))
 		moves.push_back(Move{ pawnCase,pawnCase + step, promotion });
 		//Capture Left
-		if (isPieceNone(board.board[pawnCase + step - 1]))
+		if (!isPieceNone(board.board[pawnCase + step - 1]))
 			moves.push_back(Move{ pawnCase,pawnCase + step - 1, promotion });
 		//Capture Right
-		if(isPieceNone(board.board[pawnCase + step + 1]))
+		if(!isPieceNone(board.board[pawnCase + step + 1]))
 			moves.push_back(Move{ pawnCase,pawnCase + step + 1, promotion });
 
 		return moves;
@@ -845,11 +845,17 @@ namespace MoveGeneration
 		
 		if (isPieceWhite(boardRepresentation.board[move.from]))
 		{
-			if (move.from / 8 != 4) return false;
+			if (move.from / 8 != 4)
+			{
+				return false;
+			}
 		}
 		else
 		{
-			if (move.from / 8 != 3) return false;
+			if (move.from / 8 != 3)
+			{
+				return false;
+			}
 		}
 
 		const int row = 8;

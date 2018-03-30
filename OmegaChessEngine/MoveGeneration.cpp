@@ -534,8 +534,24 @@ namespace MoveGeneration
 						&& (isPiecePawn(currentCase) || isPieceKing(currentCase))
 						&& firstOffset)
 					{
-						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
-						return true;
+						//Pawns can only eat forward
+						if (isPieceWhite(currentCase))
+						{
+							if (currentCaseIndex < pieceCase)
+							{
+								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+								return true;
+							}
+						}
+						else
+						{
+							if (currentCaseIndex > pieceCase)
+							{
+								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+								return true;
+							}
+						}
+						
 					}
 					//piece meets a bishop or queen from opposite camp, hes in check
 					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn &&
@@ -656,8 +672,23 @@ namespace MoveGeneration
 						&& (isPiecePawn(currentCase) || isPieceKing(currentCase))
 						&& firstOffset)
 					{
-						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
-						return true;
+						//Pawns can only eat forward
+						if (isPieceWhite(currentCase))
+						{
+							if (currentCaseIndex < pieceCase)
+							{
+								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+								return true;
+							}
+						}
+						else
+						{
+							if (currentCaseIndex > pieceCase)
+							{
+								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+								return true;
+							}
+						}
 					}
 					//piece meets pawn after only one offset
 					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn

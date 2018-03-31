@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <fstream>
+#include <algorithm>
 
 //init board from FEN notation: https://fr.wikipedia.org/wiki/Notation_Forsyth-Edwards
 //Used also during UTC protocol
@@ -181,8 +182,10 @@ BoardRepresentation& BoardRepresentation::operator=(const BoardRepresentation& o
 	this->canWhiteQueenCastle = other.canWhiteQueenCastle;
 	this->isEnPensantPossible = other.isEnPensantPossible;
 	this->isWhiteTurn = other.isWhiteTurn;
-	this->justLooseRightKingCastle = other.justLooseRightKingCastle;
-	this->justLooseRightQueenCastle = other.justLooseRightQueenCastle;
+	this->whiteLooseKingCastle = other.whiteLooseKingCastle;
+	this->whiteLooseQueenCastle = other.whiteLooseQueenCastle;
+	this->blackLooseKingCastle = other.blackLooseKingCastle;
+	this->blackLooseQueenCastle = other.blackLooseQueenCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
 	this->currentDepth = other.currentDepth;
@@ -203,8 +206,10 @@ BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
 	this->canWhiteQueenCastle = other.canWhiteQueenCastle;
 	this->isEnPensantPossible = other.isEnPensantPossible;
 	this->isWhiteTurn = other.isWhiteTurn;
-	this->justLooseRightKingCastle = other.justLooseRightKingCastle;
-	this->justLooseRightQueenCastle = other.justLooseRightQueenCastle;
+	this->whiteLooseKingCastle = other.whiteLooseKingCastle;
+	this->whiteLooseQueenCastle = other.whiteLooseQueenCastle;
+	this->blackLooseKingCastle = other.blackLooseKingCastle;
+	this->blackLooseQueenCastle = other.blackLooseQueenCastle;
 	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
 	this->currentDepth = other.currentDepth;
@@ -287,22 +292,26 @@ void BoardRepresentation::makeMove(Move move)
 		//King moves looses the right to castle
 		if (isPieceKing(board[move.from]))
 		{
-			
 			if (isWhiteTurn)
 			{
-				this->canWhiteQueenCastle = false;
-				this->canWhiteKingCastle = false;
-				//Help for unmakeMove
-				this->justLooseRightKingCastle = true;
-				this->justLooseRightQueenCastle = true;
+				if (this->canWhiteQueenCastle)
+				{
+					this->canWhiteQueenCastle = false;
+					this->whiteLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
+				}
+				if (this->canWhiteKingCastle)
+				{
+					this->canWhiteKingCastle = false;
+					this->whiteLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
+				}
 			}
 			else if (!isWhiteTurn)
 			{
 				this->canBlackQueenCastle = false;
 				this->canBlackKingCastle = false;
 				//Help for unmakeMove
-				this->justLooseRightKingCastle = true;
-				this->justLooseRightQueenCastle = true;
+				this->blackLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
+				this->blackLooseQueenCastle.push_back(currentDepth);
 			}
 		}
 
@@ -312,15 +321,15 @@ void BoardRepresentation::makeMove(Move move)
 			bool isKingRook = move.from < move.to;
 			if (isWhiteTurn)
 			{
-				if (isKingRook)
+				if (isKingRook && this->canWhiteKingCastle)
 				{
 					this->canWhiteKingCastle = false;
-					this->justLooseRightKingCastle = true;
+					this->whiteLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
 				}
-				else
+				else if(this->canWhiteQueenCastle)
 				{
 					this->canWhiteQueenCastle = false;
-					this->justLooseRightQueenCastle = true; //Help for unmakeMove
+					this->whiteLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 			}
 			else if (!isWhiteTurn)
@@ -328,12 +337,12 @@ void BoardRepresentation::makeMove(Move move)
 				if (isKingRook)
 				{
 					this->canBlackKingCastle = false;
-					this->justLooseRightKingCastle = true;
+					this->blackLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 				else
 				{
 					this->canBlackQueenCastle = false;
-					this->justLooseRightQueenCastle = true; //Help for unmakeMove
+					this->blackLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 			}
 		}
@@ -382,6 +391,32 @@ void BoardRepresentation::unmakeMove(Move move)
 {
 	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
 	
+	//If the past move remove castling rights, give them back
+	auto indexDeepnessRightLost = std::find(this->whiteLooseKingCastle.begin(), this->whiteLooseKingCastle.end(), currentDepth);
+	if (indexDeepnessRightLost != this->whiteLooseKingCastle.end())
+	{
+		whiteLooseKingCastle.erase(indexDeepnessRightLost);
+		this->canWhiteKingCastle = true;
+	}
+	indexDeepnessRightLost = std::find(this->whiteLooseQueenCastle.begin(), this->whiteLooseQueenCastle.end(), currentDepth);
+	if (indexDeepnessRightLost != this->whiteLooseQueenCastle.end())
+	{
+		whiteLooseQueenCastle.erase(indexDeepnessRightLost);
+		this->canWhiteQueenCastle = true;
+	}
+    indexDeepnessRightLost = std::find(this->blackLooseKingCastle.begin(), this->blackLooseKingCastle.end(), currentDepth);
+	if (indexDeepnessRightLost != this->blackLooseKingCastle.end())
+	{
+		blackLooseKingCastle.erase(indexDeepnessRightLost);
+		this->canBlackKingCastle = true;
+	}
+	indexDeepnessRightLost = std::find(this->blackLooseQueenCastle.begin(), this->blackLooseQueenCastle.end(), currentDepth);
+	if (indexDeepnessRightLost != this->blackLooseQueenCastle.end())
+	{
+		blackLooseQueenCastle.erase(indexDeepnessRightLost);
+		this->canBlackQueenCastle = true;
+	}
+
 	auto lastEnPassant = this->lastEnPassantMoves.find(currentDepth - 1);
 	this->isEnPensantPossible = lastEnPassant->second;
 	this->lastEnPassantMoves.erase(lastEnPassant);
@@ -428,15 +463,11 @@ void BoardRepresentation::unmakeMove(Move move)
 		{
 			this->canBlackKingCastle = true;
 			this->canBlackQueenCastle = true;
-			this->justLooseRightKingCastle = false;
-			this->justLooseRightQueenCastle = false;
 		}
 		else
 		{
 			this->canWhiteKingCastle = true;
 			this->canWhiteQueenCastle = true;
-			this->justLooseRightKingCastle = false;
-			this->justLooseRightQueenCastle = false;
 		}
 	}
 	else if (lastMoveIsEnPassant)
@@ -449,56 +480,6 @@ void BoardRepresentation::unmakeMove(Move move)
 	else //Not Castling, normal move
 	{
 		assert(isPieceNone(this->board[move.from]));
-
-		//King moves looses the right to castle
-		if (isPieceKing(board[move.from]))
-		{
-			if (isWhiteTurn)
-			{
-				this->canWhiteKingCastle = true;
-				this->canWhiteQueenCastle = true;
-				this->justLooseRightKingCastle = false;
-				this->justLooseRightQueenCastle = false;
-			}
-			else
-			{
-				this->canBlackKingCastle = true;
-				this->canBlackQueenCastle = true;
-				this->justLooseRightKingCastle = false;
-				this->justLooseRightQueenCastle = false;
-			}
-		}
-		else if (isPieceRook(board[move.from]))
-		{
-			if (isWhiteTurn)
-			{
-				if (this->justLooseRightKingCastle)
-				{
-					this->canWhiteKingCastle = true;
-					this->justLooseRightKingCastle = false;
-				}
-				else if (this->justLooseRightKingCastle)
-				{
-					this->canWhiteQueenCastle = true;
-					this->justLooseRightQueenCastle = false;
-				}
-
-			}
-			else
-			{
-				if (this->justLooseRightKingCastle)
-				{
-					this->canBlackKingCastle = true;
-					this->justLooseRightKingCastle = false;
-				}
-				else if (this->justLooseRightKingCastle)
-				{
-					this->canBlackQueenCastle = true;
-					this->justLooseRightQueenCastle = false;
-				}
-
-			}
-		}
 
 		//Move the piece
 		swap<Piece>(board, move.to, move.from);

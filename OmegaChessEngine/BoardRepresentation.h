@@ -36,10 +36,13 @@ public:
 
 private: 
 	/*Help for unmakeMove*/
-	std::map<int,Piece> lastCaptures; //nbrMove:Piece
-	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //nbrMove: isEnPensantPossible
-	bool justLooseRightKingCastle = false;
-	bool justLooseRightQueenCastle = false;
+	std::map<int,Piece> lastCaptures; //deepnessMove:Piece
+	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //deepnessMove: isEnPensantPossible
+	//Deepness where a castling was lost
+	std::vector<int> whiteLooseKingCastle;
+	std::vector<int> whiteLooseQueenCastle;
+	std::vector<int> blackLooseKingCastle;
+	std::vector<int> blackLooseQueenCastle;
 	int lastReversibleMovesinRow;
 	int currentDepth = 0;
 	template<class T>

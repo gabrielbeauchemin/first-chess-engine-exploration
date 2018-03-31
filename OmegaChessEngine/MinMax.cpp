@@ -60,6 +60,7 @@ int MinMax::minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWi
 	{
 		return this->getHeuristic(boardRepresentation);
 	}
+	auto t = boardRepresentation.toString();
 	//Black wants the biggest negative score and white want the biggest positive score
 	//Min player want the best move depending of its camp
 	int v = makesWhiteWin ? Evaluation::biggestEvaluation : -1 *Evaluation::biggestEvaluation;

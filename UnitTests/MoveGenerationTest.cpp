@@ -364,8 +364,9 @@ namespace UnitTests
 			Assert::IsTrue(isKingStealMate(boardRepresentation, 4));
 		}
 
-		TEST_METHOD(EnPassantComplexeCases)
+		TEST_METHOD(kingCheckComplexeCases)
 		{
+			//king is in check, only move is to eat the knight attacking it
 			BoardRepresentation boardRepresentation{ "r1bqkbnr/pppppppp/8/8/8/8/PPnPPPPP/RNBQKBNR w KQkq - 0 1" };
 			auto moves = MoveGeneration::generateMoves(boardRepresentation);
 			Assert::AreEqual(1, (int)moves.size() );
@@ -377,11 +378,10 @@ namespace UnitTests
 			nbrNodes = perftParralel(3, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 8902);
 			//Uncomment for deepest test (takes times)
-			/*nbrNodes = perftParralel(4, BoardRepresentation{});
+			nbrNodes = perftParralel(4, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 197281);
-			long long nbrNodes = perftParralel(5, BoardRepresentation{});
-			std::cout << nbrNodes;
-			Assert::IsTrue(nbrNodes == 4865609);*/
+			/*long long nbrNodes = perftParralel(5, BoardRepresentation{});
+			Assert::AreEqual(4865609, (int)nbrNodes);*/
 		}
 
 		private:
@@ -405,7 +405,7 @@ namespace UnitTests
 			{
 				std::atomic<long long> nbrNodes = 0;
 				std::mutex m;
-				unsigned int nbrCore = std::thread::hardware_concurrency();
+				unsigned int nbrCore = /*std::thread::hardware_concurrency()*/1;
 				std::vector<Move> moves = generateMoves(boardRepresentation);
 				int nbrSubTreesPerThread = moves.size() / nbrCore;
 

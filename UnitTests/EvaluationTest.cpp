@@ -3,6 +3,8 @@
 #include "../OmegaChessEngine/BoardRepresentation.h"
 #include "../OmegaChessEngine/Evaluation.h"
 #include "../OmegaChessEngine/Evaluation.cpp"
+#include <algorithm>
+#include "../OmegaChessEngine/Search.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -71,6 +73,17 @@ namespace UnitTests
 			Assert::IsTrue(Evaluation::evaluate(blackAdvantage) < 0);
 		}
 
+		//Debug particular positions tested of arena from which the
+		//Engine found a bad move
+		TEST_METHOD(EvalSpecialPositions)
+		{
+			std::map< std::string,int> movesAndHeuristic;
+			BoardRepresentation boardRepresentation{"r1bqkb1r/ppppnppp/4p3/1B2P3/1n1P4/P1N2N2/1PP2PPP/R1BQK2R b KQkq - 0 7"};
+			Search search{ 5000 };
+			std::string m = search.run(boardRepresentation).getCoordinateAlgebraicNotation();
+			
+		}
+		 
 
 
 

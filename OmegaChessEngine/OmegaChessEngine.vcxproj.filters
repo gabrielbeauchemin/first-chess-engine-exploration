@@ -66,10 +66,10 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
-    <ClCompile Include="MinMax.cpp">
+    <ClCompile Include="Search.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
-    <ClCompile Include="Search.cpp">
+    <ClCompile Include="AlphaBeta.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,10 +95,10 @@
     <ClInclude Include="Timer.h">
       <Filter>Header Files\Search</Filter>
     </ClInclude>
-    <ClInclude Include="MinMax.h">
+    <ClInclude Include="Search.h">
       <Filter>Header Files\Search</Filter>
     </ClInclude>
-    <ClInclude Include="Search.h">
+    <ClInclude Include="AlphaBeta.h">
       <Filter>Header Files\Search</Filter>
     </ClInclude>
   </ItemGroup>

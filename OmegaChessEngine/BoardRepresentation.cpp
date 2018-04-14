@@ -116,6 +116,105 @@ BoardRepresentation::BoardRepresentation(std::string fen)
 
 }
 
+std::string BoardRepresentation::toFen()
+{
+	std::string fen{};
+	//Fen Notation has 6 parts:
+	// 1)Pieces Position
+	//rook(tour), knight(cavalier), bishop(fou), queen(dame), king(roi) et pawn(pion).
+	static std::map<Piece, char> pieceToChar{ { Piece::blackRook,'r' },{ Piece::blackKnight, 'n' },{ Piece::blackBishop,  'b' },{ Piece::blackQueen, 'q' },{ Piece::blackKing, 'k' },{Piece::blackPawn,  'p' },{ Piece::whiteRook, 'R' },{ Piece::whiteKnight, 'N' },{ Piece::whiteBishop, 'B' },{ Piece::whiteQueen, 'Q' },{ Piece::whiteKing, 'K' },{ Piece::whitePawn, 'P' } };
+	for (int indexRow = 7; indexRow >= 0; --indexRow)
+	{
+		//For each row
+		for (size_t indexCase = indexRow * 8; indexCase < (indexRow * 8) +8;)
+		{
+			//Current Case is an empty case
+			if (isPieceNone(this->board[indexCase]))
+			{
+				size_t nbrEmptyCases = 0;
+				for (; indexCase < (indexRow * 8) + 8; ++indexCase)
+				{
+					if (isPieceNone(this->board[indexCase]))
+					{
+						nbrEmptyCases++;
+					}
+					else break;
+				}
+				fen += std::to_string(nbrEmptyCases);
+			}
+			//Current Case is a piece
+			else
+			{
+				fen += pieceToChar[this->board[indexCase]];
+				indexCase++;
+			}
+		}
+		if(indexRow != 0)
+		   fen += "/"; //One row done
+	}
+	// 2)Who is turn to play
+	if (this->isWhiteTurn)
+	{
+		fen += " w";
+	}
+	else
+	{
+		fen += " b";
+	}
+
+	// 3)Possible rook
+	if (this->canWhiteKingCastle == false && this->canWhiteQueenCastle == false &&
+		this->canBlackKingCastle == false && this->canBlackQueenCastle == false)
+	{
+		fen += " -";
+	}
+	else
+	{
+		fen += " ";
+		if (this->canWhiteKingCastle)
+		{
+			fen += "K";
+		}
+		if (this->canWhiteQueenCastle)
+		{
+			fen += "Q";
+		}
+		if (this->canBlackKingCastle)
+		{
+			fen += "k";
+		}
+		if (this->canBlackQueenCastle)
+		{
+			fen += "q";
+		}
+	}
+
+	// 4)Possible en Passant
+	if (this->isEnPensantPossible.first)
+	{
+		static std::unordered_map<int, std::string> rowIndexToAlgebraic{ { 0,"a" },{ 1,"b" },{ 2,"c" },{ 3,"d" },{ 4,"e" },{ 5,"f" },{ 6,"g" },{ 7,"h" } };
+		std::string algebraicNotation;
+		const int COLUMN_SIZE = 8;
+		int columnIndex = this->isEnPensantPossible.second % COLUMN_SIZE;
+		int rowIndex = this->isEnPensantPossible.second / COLUMN_SIZE;
+		algebraicNotation = rowIndexToAlgebraic[columnIndex];
+		algebraicNotation += std::to_string(rowIndex + 1);
+		fen += " " + algebraicNotation;
+	}
+	else
+	{
+		fen += " -";
+	}
+
+	// 5)Number of reversible moves
+	fen += " " + std::to_string(this->reversibleMovesInRow);
+
+	// 6)Number of total complete moves
+	//Not used for now
+
+	return fen;
+}
+
 BoardRepresentation::BoardRepresentation()
 	: isWhiteTurn{ true },
 	canBlackKingCastle{ true },
@@ -182,11 +281,6 @@ BoardRepresentation& BoardRepresentation::operator=(const BoardRepresentation& o
 	this->canWhiteQueenCastle = other.canWhiteQueenCastle;
 	this->isEnPensantPossible = other.isEnPensantPossible;
 	this->isWhiteTurn = other.isWhiteTurn;
-	this->whiteLooseKingCastle = other.whiteLooseKingCastle;
-	this->whiteLooseQueenCastle = other.whiteLooseQueenCastle;
-	this->blackLooseKingCastle = other.blackLooseKingCastle;
-	this->blackLooseQueenCastle = other.blackLooseQueenCastle;
-	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
 	this->currentDepth = other.currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
@@ -206,11 +300,6 @@ BoardRepresentation::BoardRepresentation(const BoardRepresentation & other)
 	this->canWhiteQueenCastle = other.canWhiteQueenCastle;
 	this->isEnPensantPossible = other.isEnPensantPossible;
 	this->isWhiteTurn = other.isWhiteTurn;
-	this->whiteLooseKingCastle = other.whiteLooseKingCastle;
-	this->whiteLooseQueenCastle = other.whiteLooseQueenCastle;
-	this->blackLooseKingCastle = other.blackLooseKingCastle;
-	this->blackLooseQueenCastle = other.blackLooseQueenCastle;
-	this->lastCaptures = other.lastCaptures;
 	this->lastReversibleMovesinRow = other.lastReversibleMovesinRow;
 	this->currentDepth = other.currentDepth;
 	this->reversibleMovesInRow = other.reversibleMovesInRow;
@@ -238,10 +327,9 @@ void BoardRepresentation::makeMove(Move move)
 	assert(isPieceNone(this->board[move.to]) ||
 		(isPieceWhite(this->board[move.to]) != this->isWhiteTurn));
 	
-	this->lastEnPassantMoves[currentDepth] = isEnPensantPossible; //Help for unmake move
-
 	if (isMoveCastling(move)) //Case Castling:
 	{
+		this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
 		swap<Piece>(board, move.from, move.to); //Swap King
 		bool isKingSideCastling = (move.from - move.to < 0);
 		int rookPos = 1;
@@ -281,11 +369,14 @@ void BoardRepresentation::makeMove(Move move)
 	else if(MoveGeneration::isEnPassant(*this,move))
 	{
 		//Check that the en passant is legal. 
-		//To check if the opposite pawn is really at the side of the pawn, we should have the special cases of the pawns at the limite of the board. We wont do it. Anyway, Move Generation should have already checked it.
-		assert(this->isEnPensantPossible.first == true);
-		assert(this->isEnPensantPossible.second + 1 == move.from || this->isEnPensantPossible.second + -1 == move.from);
-		swap<Piece>(board, move.from, move.to); //Move the piece
-		this->board[this->isEnPensantPossible.second] = Piece::none; //Remove captured piece
+		//To check if the opposite pawn is really at the side of the pawn, we should have the special cases of the pawns at the limit of the board. We wont do it. Anyway, Move Generation should have already checked it.
+		if (this->isEnPensantPossible.first == true)
+		{
+			assert(this->isEnPensantPossible.second + 1 == move.from || this->isEnPensantPossible.second + -1 == move.from);
+			this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
+			swap<Piece>(board, move.from, move.to); //Move the piece
+			this->board[this->isEnPensantPossible.second] = Piece::none; //Remove captured piece
+		}
 	}
 	else //Not Castling, normal move
 	{
@@ -294,24 +385,27 @@ void BoardRepresentation::makeMove(Move move)
 		{
 			if (isWhiteTurn)
 			{
+				this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
 				if (this->canWhiteQueenCastle)
 				{
 					this->canWhiteQueenCastle = false;
-					this->whiteLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 				if (this->canWhiteKingCastle)
 				{
 					this->canWhiteKingCastle = false;
-					this->whiteLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 			}
-			else if (!isWhiteTurn)
+			else
 			{
-				this->canBlackQueenCastle = false;
-				this->canBlackKingCastle = false;
-				//Help for unmakeMove
-				this->blackLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
-				this->blackLooseQueenCastle.push_back(currentDepth);
+				this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
+				if (this->canBlackQueenCastle)
+				{
+					this->canBlackQueenCastle = false;
+				}
+				if (this->canBlackKingCastle)
+				{
+					this->canBlackKingCastle = false;
+				}
 			}
 		}
 
@@ -321,28 +415,26 @@ void BoardRepresentation::makeMove(Move move)
 			bool isKingRook = move.from < move.to;
 			if (isWhiteTurn)
 			{
+				this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
 				if (isKingRook && this->canWhiteKingCastle)
 				{
 					this->canWhiteKingCastle = false;
-					this->whiteLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 				else if(this->canWhiteQueenCastle)
 				{
 					this->canWhiteQueenCastle = false;
-					this->whiteLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 			}
 			else if (!isWhiteTurn)
 			{
+				this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
 				if (isKingRook)
 				{
 					this->canBlackKingCastle = false;
-					this->blackLooseKingCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 				else
 				{
 					this->canBlackQueenCastle = false;
-					this->blackLooseQueenCastle.push_back(currentDepth); //Help for unmakeMove
 				}
 			}
 		}
@@ -350,7 +442,7 @@ void BoardRepresentation::makeMove(Move move)
 		//In case of Capture
 		if ( !isPieceNone(board[move.to]))
 		{
-			this->lastCaptures[currentDepth] = board[move.to]; //Help for unmakeMove
+			this->lastBoardPos[this->currentDepth] = this->toFen(); //Help for unmakeMove
 			board[move.to] = Piece::none;
 		}
 
@@ -371,7 +463,6 @@ void BoardRepresentation::makeMove(Move move)
 	}
 	else
 	{
-		this->lastReversibleMovesinRow = this->reversibleMovesInRow;
 		this->reversibleMovesInRow = 0;
 	}
 
@@ -391,98 +482,62 @@ void BoardRepresentation::unmakeMove(Move move)
 {
 	assert(isPieceWhite(this->board[move.to]) != this->isWhiteTurn);
 	
-	//If the past move remove castling rights, give them back
-	auto indexDeepnessRightLost = std::find(this->whiteLooseKingCastle.begin(), this->whiteLooseKingCastle.end(), currentDepth);
-	if (indexDeepnessRightLost != this->whiteLooseKingCastle.end())
+	//If the past move remove castling rights, did en passant or captured a piece, 
+	//Restore the board before the move
+	auto lastProblematicBoardPos = this->lastBoardPos.find(currentDepth-1);
+	if (lastProblematicBoardPos != this->lastBoardPos.end())
 	{
-		whiteLooseKingCastle.erase(indexDeepnessRightLost);
-		this->canWhiteKingCastle = true;
-	}
-	indexDeepnessRightLost = std::find(this->whiteLooseQueenCastle.begin(), this->whiteLooseQueenCastle.end(), currentDepth);
-	if (indexDeepnessRightLost != this->whiteLooseQueenCastle.end())
-	{
-		whiteLooseQueenCastle.erase(indexDeepnessRightLost);
-		this->canWhiteQueenCastle = true;
-	}
-    indexDeepnessRightLost = std::find(this->blackLooseKingCastle.begin(), this->blackLooseKingCastle.end(), currentDepth);
-	if (indexDeepnessRightLost != this->blackLooseKingCastle.end())
-	{
-		blackLooseKingCastle.erase(indexDeepnessRightLost);
-		this->canBlackKingCastle = true;
-	}
-	indexDeepnessRightLost = std::find(this->blackLooseQueenCastle.begin(), this->blackLooseQueenCastle.end(), currentDepth);
-	if (indexDeepnessRightLost != this->blackLooseQueenCastle.end())
-	{
-		blackLooseQueenCastle.erase(indexDeepnessRightLost);
-		this->canBlackQueenCastle = true;
-	}
-
-	auto lastEnPassant = this->lastEnPassantMoves.find(currentDepth - 1);
-	this->isEnPensantPossible = lastEnPassant->second;
-	this->lastEnPassantMoves.erase(lastEnPassant);
-	bool lastMoveIsEnPassant = false;
-	if (this->isEnPensantPossible.first)
-	{
-		int step = isWhiteTurn ? -8 : 8;
-		int endPosEnPassant = this->isEnPensantPossible.second + step;
-		Piece pieceAtEnPassantPos = this->board[endPosEnPassant];
-		if (isPiecePawn(pieceAtEnPassantPos) &&
-			isPieceWhite(pieceAtEnPassantPos) != this->isWhiteTurn)
+		BoardRepresentation boardBeforeMove = BoardRepresentation(lastProblematicBoardPos->second);
+		for (int i = 0; i < 64; ++i)
 		{
-			lastMoveIsEnPassant = true;
+			this->board[i] = boardBeforeMove.board[i];
 		}
+		this->canBlackKingCastle = boardBeforeMove.canBlackKingCastle;
+		this->canBlackQueenCastle = boardBeforeMove.canBlackQueenCastle;
+		this->canWhiteKingCastle = boardBeforeMove.canWhiteKingCastle;
+		this->canWhiteQueenCastle = boardBeforeMove.canWhiteQueenCastle;
+		this->reversibleMovesInRow = boardBeforeMove.reversibleMovesInRow;
+		this->isEnPensantPossible = boardBeforeMove.isEnPensantPossible;
+		this->currentDepth = currentDepth - 1;
+		this->isWhiteTurn = !this->isWhiteTurn;
+		lastBoardPos.erase(lastProblematicBoardPos);
+		return;
 	}
-
-	if (isMoveCastling(move)) //Case Castling:
-	{
-		swap<Piece>(board, move.to, move.from); //Swap King
-		bool isKingSideCastling = (move.from - move.to < 0);
-		int initialRookPos = -1;
-		if (this->isWhiteTurn && isKingSideCastling)
-		{
-			initialRookPos = 63;
-		}
-		else if (this->isWhiteTurn && !isKingSideCastling)
-		{
-			initialRookPos = 56;
-		}
-		else if (!this->isWhiteTurn && isKingSideCastling)
-		{
-			initialRookPos = 7;
-		}
-		else if (!this->isWhiteTurn && !isKingSideCastling)
-		{
-			initialRookPos = 0;
-		}
-		assert(initialRookPos != -1);
-
-		int translationRook = (isKingSideCastling) ? -2 : 3;
-		swap<Piece>(board, initialRookPos + translationRook, initialRookPos); //Swap Rook
-
-		if (isWhiteTurn)
-		{
-			this->canBlackKingCastle = true;
-			this->canBlackQueenCastle = true;
-		}
-		else
-		{
-			this->canWhiteKingCastle = true;
-			this->canWhiteQueenCastle = true;
-		}
-	}
-	else if (lastMoveIsEnPassant)
-	{
-		swap<Piece>(board, move.from, move.to); //Move the piece
-		//Put back the pawn captured last move by en passant
-		Piece capturedEnPassantPawn = this->isWhiteTurn ? Piece::whitePawn : Piece::blackPawn;
-		this->board[this->isEnPensantPossible.second] = capturedEnPassantPawn;
-	}
-	else //Not Castling, normal move
+	else //Normal move
 	{
 		assert(isPieceNone(this->board[move.from]));
 
+		//King moves looses the right to castle
+		if (isPieceKing(board[move.from]))
+		{
+			if (isWhiteTurn)
+			{
+				this->canWhiteKingCastle = true;
+				this->canWhiteQueenCastle = true;
+			}
+			else
+			{
+				this->canBlackKingCastle = true;
+				this->canBlackQueenCastle = true;
+			}
+		}
+		else if (isPieceRook(board[move.from]))
+		{
+			if (isWhiteTurn)
+			{
+			    this->canWhiteKingCastle = true;
+				this->canWhiteQueenCastle = true;
+			}
+			else
+			{
+				this->canBlackKingCastle = true;
+				this->canBlackQueenCastle = true;
+			}
+		}
+
 		//Move the piece
 		swap<Piece>(board, move.to, move.from);
+
 
 		//In case of Promotion
 		if (!isPieceNone(move.promotion))
@@ -495,16 +550,6 @@ void BoardRepresentation::unmakeMove(Move move)
 			{
 				board[move.from] = Piece::blackPawn;
 			}
-
-		}
-
-		//In case that a piece got Captured the move before
-		auto lastCapture = this->lastCaptures.find(currentDepth - 1);
-		if (lastCaptures.end() != lastCapture)
-		{
-			assert(this->isWhiteTurn == isPieceWhite(lastCapture->second));
-			board[move.to] = lastCapture->second;
-			this->lastCaptures.erase(lastCapture);
 		}
 	}
 
@@ -597,8 +642,7 @@ int BoardRepresentation::getCurrentDepth()
 void BoardRepresentation::clearLastMovesMetaData()
 {
 	this->currentDepth = 0;
-	lastCaptures.clear();
-	lastEnPassantMoves.clear();
+	this->lastBoardPos.clear();
 }
 
 bool BoardRepresentation::isMoveCastling(Move move)

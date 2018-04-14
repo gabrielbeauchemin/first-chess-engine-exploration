@@ -2,7 +2,7 @@
 #define Search_H 
 
 #include "BoardRepresentation.h"
-#include "MinMax.h"
+#include "AlphaBeta.h"
 #include "Timer.h"
 
 class Search
@@ -14,7 +14,7 @@ public:
 	void setTimeMax(uint64_t msMaxByMove);
 
 private:
-	MinMax minMax;
+	AlphaBeta alphaBeta;
 	Timer timer;
 };
 

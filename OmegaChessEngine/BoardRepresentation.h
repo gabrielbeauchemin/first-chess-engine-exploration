@@ -31,18 +31,14 @@ public:
 	void makeMove(Move move);
 	void unmakeMove(Move move);
 	std::string toString();
+	std::string toFen();
 	int getCurrentDepth();
 	void clearLastMovesMetaData();
 
 private: 
-	/*Help for unmakeMove*/
-	std::map<int,Piece> lastCaptures; //deepnessMove:Piece
-	std::map<int, std::pair<bool, int>> lastEnPassantMoves; //deepnessMove: isEnPensantPossible
-	//Deepness where a castling was lost
-	std::vector<int> whiteLooseKingCastle;
-	std::vector<int> whiteLooseQueenCastle;
-	std::vector<int> blackLooseKingCastle;
-	std::vector<int> blackLooseQueenCastle;
+	/*Help for unmakeMove in case of castling, captures or en passant*/
+	std::map<int,std::string> lastBoardPos; //deepnessMove:board in fen notation
+	
 	int lastReversibleMovesinRow;
 	int currentDepth = 0;
 	template<class T>

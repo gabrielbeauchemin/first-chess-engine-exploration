@@ -100,65 +100,47 @@ namespace UnitTests
 
 		TEST_METHOD(BoardInitFen)
 		{
-			BoardRepresentation board{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
-			auto b = board.toString();
-			Assert::IsTrue(board.isWhiteTurn);
-			Assert::IsFalse(board.isEnPensantPossible.first);
-			Assert::IsTrue(board.canBlackKingCastle && board.canBlackQueenCastle && board.canWhiteKingCastle && board.canWhiteQueenCastle);
-			Assert::AreEqual(board.reversibleMovesInRow, 0);
-
-			//Check if the board contains at total the good number of each type of piece
-			int nbrRook = 0, nbrBishop = 0, nbrKnight = 0, nbrKing = 0, nbrQueen = 0, nbrPawn = 0, nbrEmptyCase = 0;
-			for (auto& e : board.board)
-			{
-				if (isPieceBishop(e))
-					++nbrBishop;
-				else if (isPieceKnight(e))
-					++nbrKnight;
-				else if (isPieceKing(e))
-					++nbrKing;
-				else if (isPieceQueen(e))
-					++nbrQueen;
-				else if (isPiecePawn(e))
-					++nbrPawn;
-				else if (isPieceRook(e))
-					++nbrRook;
-				else
-					++nbrEmptyCase;
-			}
-
-			Assert::AreEqual(nbrRook, 4);
-			Assert::AreEqual(nbrBishop, 4);
-			Assert::AreEqual(nbrKnight, 4);
-			Assert::AreEqual(nbrKing, 2);
-			Assert::AreEqual(nbrQueen, 2);
-			Assert::AreEqual(nbrPawn, 16);
-			Assert::AreEqual(nbrEmptyCase, 32);
+			std::string fenInitGame = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+			BoardRepresentation board{ fenInitGame };
+			std::string fenAfterConstructor = board.toFen() + " 1";
+			Assert::IsTrue(fenInitGame == fenAfterConstructor);
 		}
 
 		TEST_METHOD(BoardInitFenMiddleGames)
 		{
 			//Test Fen that permits en passant
 			//The next boardRepresentation represents an initial board after move 1.e4 from white
-			BoardRepresentation boardRepresentation{ "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1" };
+			std::string fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
+			BoardRepresentation boardRepresentation{fen};
 			Assert::IsTrue(boardRepresentation.isEnPensantPossible.first);
 			Assert::AreEqual(20, boardRepresentation.isEnPensantPossible.second);
+			std::string boardRepresentationFen = boardRepresentation.toFen() + " 1";
+			Assert::IsTrue(fen == boardRepresentationFen);
 
 			//Test Fen with king rook possibles on only one side, or not possible at all
 			//Rook possible on king side only for white and on queen side only for black
-			BoardRepresentation boardRepresentation2{ "r3k2r/b4p2/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w Kq - 0 1" };
+			fen = "r3k2r/b4p2/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w Kq - 0 1";
+			BoardRepresentation boardRepresentation2{ fen };
 			Assert::IsTrue(!boardRepresentation2.canBlackKingCastle && boardRepresentation2.canBlackQueenCastle
 				&& boardRepresentation2.canWhiteKingCastle && !boardRepresentation2.canWhiteQueenCastle);
+			boardRepresentationFen = boardRepresentation2.toFen() + " 1";
+			Assert::IsTrue(fen == boardRepresentationFen);
 			
 			//Rook possible on queen side only for white and on king side only for black
-			BoardRepresentation boardRepresentation3{ "r1bqk2r/b4p2/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w Qk - 0 1" };
+			fen = "r1bqk2r/b4p2/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w Qk - 0 1";
+			BoardRepresentation boardRepresentation3{ fen };
 			Assert::IsTrue(boardRepresentation3.canBlackKingCastle && !boardRepresentation3.canBlackQueenCastle
 				&& !boardRepresentation3.canWhiteKingCastle && boardRepresentation3.canWhiteQueenCastle);
+			boardRepresentationFen = boardRepresentation3.toFen() + " 1";
+			Assert::IsTrue(fen == boardRepresentationFen);
 
 			//Rook not possible for both side
-			BoardRepresentation boardRepresentation4{ "4k2r/1R3R2/p3p1pp/4b3/1BnNr3/8/P1P5/5K2 w - -1 0" };
+			fen = "4k2r/1R3R2/p3p1pp/4b3/1BnNr3/8/P1P5/5K2 w - - 1 0";
+			BoardRepresentation boardRepresentation4{ fen };
 			Assert::IsTrue(!boardRepresentation4.canBlackKingCastle && !boardRepresentation4.canBlackQueenCastle 
 				           && !boardRepresentation4.canWhiteKingCastle && !boardRepresentation4.canWhiteQueenCastle);
+			boardRepresentationFen = boardRepresentation4.toFen() + " 0";
+			Assert::IsTrue(fen == boardRepresentationFen);
 			
 		}
 

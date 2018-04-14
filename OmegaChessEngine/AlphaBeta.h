@@ -1,14 +1,14 @@
-#ifndef MinMax_H
-#define MinMax_H 
+#ifndef AlphaBeta_H
+#define AlphaBeta_H 
 
 #include <functional>
 #include "BoardRepresentation.h"
 
-class MinMax
+class AlphaBeta
 {
 public: 
-	MinMax();
-	MinMax(std::function<int(BoardRepresentation&)> getHeuristic,
+	AlphaBeta();
+	AlphaBeta(std::function<int(BoardRepresentation&)> getHeuristic,
 	std::function<std::vector<Move>(BoardRepresentation&)> generateLegalMoves,
 	std::function<bool(BoardRepresentation&)> stopSearching);
 
@@ -19,8 +19,8 @@ private:
 	std::function<std::vector<Move>(BoardRepresentation&)> generateLegalMoves;
 	std::function<bool(BoardRepresentation&)> stopSearching;
 
-	std::pair<int, Move> maxValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin); //Represent the side of the board of the engine
-	int minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin); //Represent the opposite player
+	std::pair<int, Move> maxValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin, int alpha, int beta); //Represent the side of the board of the engine
+	int minValue(BoardRepresentation& boardRepresentation, bool makesWhiteWin, int alpha, int beta); //Represent the opposite player
 };
 
 #endif

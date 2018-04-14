@@ -491,16 +491,27 @@ namespace MoveGeneration
 	{
 		std::vector<Move> moves;
 		const int row = 8;
+		auto isOutBound = [](int pos) { return pos < 0 || pos > 63; };
 		int step = (board.isWhiteTurn) ? row : -row;
 		//Avance of one case
 		if (isPieceNone(board.board[pawnCase + step]))
-		moves.push_back(Move{ pawnCase,pawnCase + step, promotion });
+		{
+			moves.push_back(Move{ pawnCase,pawnCase + step, promotion });
+		}
 		//Capture Left
-		if (!isPieceNone(board.board[pawnCase + step - 1]))
+		if (!isPieceNone(board.board[pawnCase + step - 1])
+			&& isPieceWhite(board.board[pawnCase + step -1]) != board.isWhiteTurn
+			&& !isOutBound(pawnCase + step -1))
+		{
 			moves.push_back(Move{ pawnCase,pawnCase + step - 1, promotion });
+		}
 		//Capture Right
-		if(!isPieceNone(board.board[pawnCase + step + 1]))
+		if (!isPieceNone(board.board[pawnCase + step + 1])
+			&& isPieceWhite(board.board[pawnCase + step +1]) != board.isWhiteTurn
+			&& !isOutBound(pawnCase + step + 1))
+		{
 			moves.push_back(Move{ pawnCase,pawnCase + step + 1, promotion });
+		}
 
 		return moves;
 	}
@@ -529,12 +540,11 @@ namespace MoveGeneration
 				auto currentCase = boardRepresentation.board[currentCaseIndex];
 				if (!isPieceNone(currentCase))
 				{
-					//piece meets pawn or king after only one offset
+					//piece meets pawn after only one offset
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
-						&& (isPiecePawn(currentCase) || isPieceKing(currentCase))
-						&& firstOffset)
+						&& (isPiecePawn(currentCase)) && firstOffset)
 					{
-						//Pawns can only eat forward
+						//Pawns can only eat moving forward
 						if (isPieceWhite(currentCase))
 						{
 							if (currentCaseIndex < pieceCase)
@@ -552,6 +562,13 @@ namespace MoveGeneration
 							}
 						}
 						
+					}
+					//piece meets king after only one offset
+					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
+						&& (isPieceKing(currentCase)) && firstOffset)
+					{
+						boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
+						return true;
 					}
 					//piece meets a bishop or queen from opposite camp, hes in check
 					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn &&
@@ -667,28 +684,31 @@ namespace MoveGeneration
 				auto currentCase = boardRepresentation.board[currentCaseIndex];
 				if (!isPieceNone(currentCase))
 				{
-					//piece meets pawn or king after only one offset
+					//piece meets pawn after only one offset
 					if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
-						&& (isPiecePawn(currentCase) || isPieceKing(currentCase))
-						&& firstOffset)
+						&& (isPiecePawn(currentCase) && firstOffset))
 					{
 						//Pawns can only eat forward
 						if (isPieceWhite(currentCase))
 						{
 							if (currentCaseIndex < pieceCase)
 							{
-								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
-								return true;
+								nbrTimesPieceAttacked++;
 							}
 						}
 						else
 						{
 							if (currentCaseIndex > pieceCase)
 							{
-								boardRepresentation.board[pieceCase] = piecePotentiallyAttacked;
-								return true;
+								nbrTimesPieceAttacked++;
 							}
 						}
+					}
+					//piece meets king after only one offset
+					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn
+						&& (isPieceKing(currentCase)) && firstOffset)
+					{
+						nbrTimesPieceAttacked++;
 					}
 					//piece meets pawn after only one offset
 					else if (isPieceWhite(currentCase) != boardRepresentation.isWhiteTurn

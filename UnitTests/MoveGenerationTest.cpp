@@ -373,15 +373,15 @@ namespace UnitTests
 		}
 		TEST_METHOD(Perft)
 		{
-			long long nbrNodes = perftParralel(2, BoardRepresentation{});
+			/*long long nbrNodes = perftParralel(2, BoardRepresentation{});
 			Assert::IsTrue(nbrNodes == 400);
-			nbrNodes = perftParralel(3, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 8902);
+			nbrNodes = perftParralel(3, BoardRepresentation{});*/
+			//Assert::IsTrue(nbrNodes == 8902);
 			//Uncomment for deepest test (takes times)
-			nbrNodes = perftParralel(4, BoardRepresentation{});
-			Assert::IsTrue(nbrNodes == 197281);
-			/*long long nbrNodes = perftParralel(5, BoardRepresentation{});
-			Assert::AreEqual(4865609, (int)nbrNodes);*/
+			/*auto nbrNodes = perftParralel(4, BoardRepresentation{});
+			Assert::IsTrue(nbrNodes == 197281);*/
+			long long nbrNodes = perftParralel(5, BoardRepresentation{});
+			Assert::AreEqual(4865609, (int)nbrNodes);
 		}
 
 		private:
@@ -405,7 +405,7 @@ namespace UnitTests
 			{
 				std::atomic<long long> nbrNodes = 0;
 				std::mutex m;
-				unsigned int nbrCore = /*std::thread::hardware_concurrency()*/1;
+				unsigned int nbrCore = std::thread::hardware_concurrency();
 				std::vector<Move> moves = generateMoves(boardRepresentation);
 				int nbrSubTreesPerThread = moves.size() / nbrCore;
 

@@ -1,0 +1,1 @@
+Exploration of the basic algorithms of chess. The end product is a chess engine that can be used to play chess, but it is not strong and there's still bugs causing the engine to find bad moves or simply frozing.
